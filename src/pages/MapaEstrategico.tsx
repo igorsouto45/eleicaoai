@@ -1,10 +1,14 @@
-import { MapPin } from "lucide-react";
+import { Trophy, Users, TrendingUp, PieChart as PieIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import HeatmapLayer from "@/components/HeatmapLayer";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 
 // Fix default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -14,41 +18,62 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-const bairros = [
-  { nome: "Centro", apoiadores: 220, indecisos: 89, rejeicao: 31, total: 340, lat: -22.9068, lng: -43.1729 },
-  { nome: "Copacabana", apoiadores: 160, indecisos: 78, rejeicao: 42, total: 280, lat: -22.9711, lng: -43.1826 },
-  { nome: "Tijuca", apoiadores: 130, indecisos: 52, rejeicao: 28, total: 210, lat: -22.9325, lng: -43.2436 },
-  { nome: "Barra da Tijuca", apoiadores: 110, indecisos: 40, rejeicao: 25, total: 175, lat: -23.0004, lng: -43.3658 },
-  { nome: "Madureira", apoiadores: 80, indecisos: 38, rejeicao: 22, total: 140, lat: -22.8731, lng: -43.3392 },
-  { nome: "Méier", apoiadores: 65, indecisos: 30, rejeicao: 15, total: 110, lat: -22.9025, lng: -43.2822 },
-  { nome: "Campo Grande", apoiadores: 55, indecisos: 25, rejeicao: 10, total: 90, lat: -22.9035, lng: -43.5618 },
-  { nome: "Botafogo", apoiadores: 40, indecisos: 20, rejeicao: 8, total: 68, lat: -22.9519, lng: -43.1857 },
-  { nome: "Ipanema", apoiadores: 95, indecisos: 35, rejeicao: 18, total: 148, lat: -22.9838, lng: -43.2096 },
-  { nome: "Santa Cruz", apoiadores: 45, indecisos: 60, rejeicao: 35, total: 140, lat: -22.9135, lng: -43.6868 },
-  { nome: "Bangu", apoiadores: 70, indecisos: 55, rejeicao: 30, total: 155, lat: -22.8749, lng: -43.4631 },
-  { nome: "Penha", apoiadores: 50, indecisos: 45, rejeicao: 25, total: 120, lat: -22.8383, lng: -43.2781 },
-];
+// Coordenadas centrais aproximadas para representação no mapa (Rio de Janeiro)
+const LIDER_COORDS: Record<string, { lat: number; lng: number }> = {
+  "2": { lat: -22.9068, lng: -43.1729 }, // João Líder (Centro)
+  "3": { lat: -22.9711, lng: -43.1826 }, // Ana Líder (Copacabana)
+  "unknown": { lat: -22.9325, lng: -43.2436 }, // Sistema/Outros (Tijuca)
+};
 
 const MapaEstrategico = () => {
-  const maxTotal = Math.max(...bairros.map((b) => b.total));
+  const { liderados } = useLideradosStore();
+  const totalGeral = liderados.length;
 
-  // Generate heatmap points: more points = higher intensity per bairro
-  const heatPoints: [number, number, number][] = bairros.flatMap((b) => {
+  const statsPorLider = useMemo(() => {
+    const mapa = new Map();
+    liderados.forEach(l => {
+      const entry = mapa.get(l.origemId) || { 
+        id: l.origemId,
+        nome: l.origemNome, 
+        apoiadores: 0, 
+        indecisos: 0, 
+        rejeicao: 0, 
+        total: 0,
+        coords: LIDER_COORDS[l.origemId] || LIDER_COORDS["unknown"]
+      };
+      
+      entry.total++;
+      if (l.status === 'apoiador') entry.apoiadores++;
+      else if (l.status === 'indeciso') entry.indecisos++;
+      else if (l.status === 'rejeicao') entry.rejeicao++;
+      
+      mapa.set(l.origemId, entry);
+    });
+    
+    return Array.from(mapa.values()).map(l => ({
+      ...l,
+      percentualGeral: totalGeral > 0 ? (l.total / totalGeral) * 100 : 0
+    })).sort((a, b) => b.total - a.total);
+  }, [liderados, totalGeral]);
+
+  const maxTotal = Math.max(...statsPorLider.map((s) => s.total), 1);
+
+  // Generate heatmap points baseados nos líderes
+  const heatPoints: [number, number, number][] = statsPorLider.flatMap((s) => {
     const points: [number, number, number][] = [];
-    // Apoiadores (green intensity at base)
-    const intensity = b.total / maxTotal;
-    // Spread points around bairro center
-    for (let i = 0; i < Math.ceil(b.total / 20); i++) {
-      const jitterLat = (Math.random() - 0.5) * 0.015;
-      const jitterLng = (Math.random() - 0.5) * 0.015;
-      points.push([b.lat + jitterLat, b.lng + jitterLng, intensity]);
+    const intensity = s.total / maxTotal;
+    
+    for (let i = 0; i < Math.ceil(s.total * 2); i++) {
+      const jitterLat = (Math.random() - 0.5) * 0.05;
+      const jitterLng = (Math.random() - 0.5) * 0.05;
+      points.push([s.coords.lat + jitterLat, s.coords.lng + jitterLng, intensity]);
     }
     return points;
   });
 
-  const getStatusColor = (b: typeof bairros[0]) => {
-    if (b.apoiadores > b.indecisos + b.rejeicao) return "text-green-400";
-    if (b.indecisos > b.apoiadores) return "text-yellow-400";
+  const getStatusColor = (s: any) => {
+    if (s.apoiadores > s.indecisos + s.rejeicao) return "text-green-400";
+    if (s.indecisos > s.apoiadores) return "text-yellow-400";
     return "text-red-400";
   };
 
@@ -91,15 +116,28 @@ const MapaEstrategico = () => {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             <HeatmapLayer points={heatPoints} />
-            {bairros.map((b) => (
-              <Marker key={b.nome} position={[b.lat, b.lng]}>
+            {statsPorLider.map((s) => (
+              <Marker key={s.id} position={[s.coords.lat, s.coords.lng]}>
                 <Popup>
-                  <div className="text-sm">
-                    <strong>{b.nome}</strong>
-                    <div>Total: {b.total}</div>
-                    <div style={{ color: "#22c55e" }}>Apoiadores: {b.apoiadores}</div>
-                    <div style={{ color: "#eab308" }}>Indecisos: {b.indecisos}</div>
-                    <div style={{ color: "#ef4444" }}>Rejeição: {b.rejeicao}</div>
+                  <div className="text-sm p-1">
+                    <strong className="text-primary block mb-1">{s.nome}</strong>
+                    <div className="font-bold border-b border-border pb-1 mb-1">
+                      {s.total} Liderados ({s.percentualGeral.toFixed(1)}%)
+                    </div>
+                    <div className="flex flex-col gap-0.5 mt-2">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-green-500">Apoiadores:</span>
+                        <span className="font-bold">{s.apoiadores}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-yellow-500">Indecisos:</span>
+                        <span className="font-bold">{s.indecisos}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-red-500">Rejeição:</span>
+                        <span className="font-bold">{s.rejeicao}</span>
+                      </div>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -107,30 +145,52 @@ const MapaEstrategico = () => {
           </MapContainer>
         </motion.div>
 
-        {/* Bairro cards */}
+        {/* Leader cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {bairros.map((b, i) => (
+          {statsPorLider.map((s, i) => (
             <motion.div
-              key={b.nome}
+              key={s.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.03 }}
-              className="glass-card rounded-xl p-4"
+              transition={{ delay: i * 0.05 }}
+              className="glass-card rounded-xl p-4 border border-white/5 hover:border-primary/30 transition-all"
             >
-              <div className="mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">{b.nome}</h3>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground truncate max-w-[120px]">{s.nome}</h3>
+                </div>
+                <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20">
+                  {s.percentualGeral.toFixed(1)}%
+                </Badge>
               </div>
-              <p className={`text-xl font-bold ${getStatusColor(b)} mb-2`}>{b.total}</p>
-              <div className="flex h-2.5 overflow-hidden rounded-full">
-                <div className="bg-green-500" style={{ width: `${(b.apoiadores / b.total) * 100}%` }} />
-                <div className="bg-yellow-500" style={{ width: `${(b.indecisos / b.total) * 100}%` }} />
-                <div className="bg-red-500" style={{ width: `${(b.rejeicao / b.total) * 100}%` }} />
+              
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className={`text-2xl font-bold ${getStatusColor(s)}`}>{s.total}</span>
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Liderados</span>
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                <span>{b.apoiadores}</span>
-                <span>{b.indecisos}</span>
-                <span>{b.rejeicao}</span>
+
+              <div className="space-y-2">
+                <div className="flex h-1.5 overflow-hidden rounded-full bg-white/5">
+                  <div className="bg-green-500" style={{ width: `${(s.apoiadores / s.total) * 100}%` }} />
+                  <div className="bg-yellow-500" style={{ width: `${(s.indecisos / s.total) * 100}%` }} />
+                  <div className="bg-red-500" style={{ width: `${(s.rejeicao / s.total) * 100}%` }} />
+                </div>
+                
+                <div className="flex justify-between items-center text-[9px] font-bold">
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    <span className="text-muted-foreground">{s.apoiadores}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                    <span className="text-muted-foreground">{s.indecisos}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                    <span className="text-muted-foreground">{s.rejeicao}</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
