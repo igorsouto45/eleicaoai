@@ -46,6 +46,16 @@ import { useLideradosStore } from "@/store/useLideradosStore";
 
 const formSchema = z.object({
   nome: z.string().min(2, "Nome é obrigatório"),
+  cpf: z.string().min(11, "CPF inválido"),
+  dataNascimento: z.string().min(10, "Data inválida"),
+  nomeMae: z.string().min(2, "Nome da mãe é obrigatório"),
+  tituloEleitoral: z.string().optional(),
+  secao: z.string().optional(),
+  zona: z.string().optional(),
+  temBiometria: z.boolean().default(false),
+  municipio: z.string().min(2, "Município é obrigatório"),
+  uf: z.string().length(2, "UF deve ter 2 caracteres"),
+  endereco: z.string().min(5, "Endereço é obrigatório"),
   telefone: z.string().min(10, "Telefone inválido"),
   bairro: z.string().min(2, "Bairro é obrigatório"),
   status: z.enum(["apoiador", "indeciso", "rejeicao"]),
