@@ -157,7 +157,7 @@ const ScannerFicha = () => {
 
   const downloadTemplate = () => {
     toast.info("Gerando modelo oficial de ficha...");
-    gerarFichaPDF();
+    gerarFichaPDF(undefined, true);
   };
 
   return (

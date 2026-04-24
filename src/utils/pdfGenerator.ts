@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 
-export const gerarFichaPDF = (dados?: any) => {
+export const gerarFichaPDF = (dados?: any, download: boolean = true) => {
   const doc = new jsPDF();
   const margin = 20;
   let yPos = 30;
@@ -75,5 +75,8 @@ export const gerarFichaPDF = (dados?: any) => {
   doc.setTextColor(150);
   doc.text("Gerado por Comando Eleitoral AI - Sistema de Gestão Estratégica", margin, 285);
 
-  doc.save(`ficha_${dados?.nome || "modelo"}.pdf`);
+  if (download) {
+    doc.save(`ficha_${dados?.nome || "modelo"}.pdf`);
+  }
+  return doc;
 };
