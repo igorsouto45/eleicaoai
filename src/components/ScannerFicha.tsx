@@ -109,7 +109,17 @@ const ScannerFicha = () => {
       toast.error("Nome e telefone são obrigatórios.");
       return;
     }
-    toast.success(`${data.nome} salvo no CRM como INDECISO.`);
+
+    addLiderado({
+      nome: data.nome || "",
+      telefone: data.telefone || "",
+      bairro: data.bairro || "",
+      status: "indeciso",
+      origemId: user?.id || "unknown",
+      origemNome: user?.nome || "Scanner",
+      data: new Date().toISOString().split('T')[0],
+    });
+
     setPreview(null);
     setResult(null);
   };
