@@ -53,9 +53,34 @@ const Reconquista = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Operação Reconquista</h1>
-          <p className="text-sm text-muted-foreground">Foco estratégico em converter indecisos e mitigar rejeições</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Operação Reconquista</h1>
+            <p className="text-sm text-muted-foreground">Foco estratégico em converter indecisos e mitigar rejeições</p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="relative w-48">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                className="pl-8 bg-card border-border h-9 text-xs" 
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBairro} 
+                onChange={e => setFilterBairro(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none"
+              >
+                <option value="">Todos os Bairros</option>
+                {bairros.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
