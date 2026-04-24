@@ -18,10 +18,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-const ranking = [
-  { id: "2", pos: 1, nome: "João Líder", tipo: "Líder", cadastros: 142, conversoes: 98, taxa: 69 },
-  { id: "3", pos: 2, nome: "Ana Líder", tipo: "Líder", cadastros: 89, conversoes: 61, taxa: 68 },
-];
+const ranking = [];
 
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
 
