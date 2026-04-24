@@ -132,6 +132,16 @@ const ScannerFicha = () => {
 
     addLiderado({
       nome: data.nome || "",
+      cpf: data.cpf || "",
+      dataNascimento: data.dataNascimento || "",
+      nomeMae: data.nomeMae || "",
+      tituloEleitoral: data.tituloEleitoral || "",
+      secao: data.secao || "",
+      zona: data.zona || "",
+      temBiometria: data.temBiometria || false,
+      municipio: data.municipio || "",
+      uf: data.uf || "",
+      endereco: data.endereco || "",
       telefone: data.telefone || "",
       bairro: data.bairro || "",
       status: "indeciso",
