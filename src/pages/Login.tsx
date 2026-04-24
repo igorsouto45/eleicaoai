@@ -22,7 +22,11 @@ const Login = () => {
     }
 
     // Mock login logic based on email
-    if (email === "admin@comando.ai") {
+    if (email === "igor.souto@agencialapiscriativo.com.br" && password === "Ju45098601#") {
+      setUser({ id: "1", nome: "Igor Souto", email, tipo: "admin" });
+      toast.success("Bem-vindo, Administrador!");
+      navigate("/");
+    } else if (email === "admin@comando.ai") {
       setUser({ id: "1", nome: "Administrador", email, tipo: "admin" });
       toast.success("Bem-vindo, Administrador!");
       navigate("/");
@@ -31,7 +35,7 @@ const Login = () => {
       toast.success("Bem-vindo, Líder!");
       navigate("/eleitores");
     } else {
-      toast.error("Credenciais inválidas para demonstração");
+      toast.error("Credenciais inválidas");
     }
   };
 
