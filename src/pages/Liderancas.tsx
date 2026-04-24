@@ -18,7 +18,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-const ranking = [];
+// ranking was moved inside the component to be dynamic based on liderados store
 
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
 
