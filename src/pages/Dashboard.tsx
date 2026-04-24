@@ -3,6 +3,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import AppLayout from "@/components/AppLayout";
 import KpiCard from "@/components/KpiCard";
 import AiInsightCard from "@/components/AiInsightCard";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useLideradosStore } from "@/store/useLideradosStore";
 
 const dailyData = [
   { dia: "Seg", cadastros: 45, conversoes: 12 },
