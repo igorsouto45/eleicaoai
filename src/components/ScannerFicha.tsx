@@ -211,10 +211,10 @@ BAIRRO: _______________________  WHATSAPP: _____________________
               </div>
               
               {result && (
-                <div className="bg-muted/50 rounded-lg p-3 space-y-3 animate-in fade-in slide-in-from-top-2 border border-border/50">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-3 animate-in fade-in slide-in-from-top-2 border border-border/50 max-h-[300px] overflow-y-auto">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Nome</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Nome Completo</p>
                       <input 
                         className="w-full bg-transparent text-sm font-medium focus:outline-none border-b border-primary/20" 
                         value={result.nome} 
@@ -222,7 +222,57 @@ BAIRRO: _______________________  WHATSAPP: _____________________
                       />
                     </div>
                     <div>
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Telefone</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">CPF</p>
+                      <input 
+                        className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                        value={result.cpf} 
+                        onChange={e => setResult({...result, cpf: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Nascimento</p>
+                      <input 
+                        className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                        value={result.dataNascimento} 
+                        onChange={e => setResult({...result, dataNascimento: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Nome da Mãe</p>
+                      <input 
+                        className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                        value={result.nomeMae} 
+                        onChange={e => setResult({...result, nomeMae: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Título</p>
+                      <input 
+                        className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                        value={result.tituloEleitoral} 
+                        onChange={e => setResult({...result, tituloEleitoral: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Seção</p>
+                        <input 
+                          className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                          value={result.secao} 
+                          onChange={e => setResult({...result, secao: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Zona</p>
+                        <input 
+                          className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                          value={result.zona} 
+                          onChange={e => setResult({...result, zona: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">WhatsApp</p>
                       <input 
                         className={`w-full bg-transparent text-sm focus:outline-none border-b ${validatePhone(result.telefone || "") ? 'border-primary/20' : 'border-destructive'}`}
                         value={result.telefone} 
