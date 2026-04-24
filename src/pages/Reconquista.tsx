@@ -119,13 +119,18 @@ const Reconquista = () => {
                       <div className="space-y-3 py-4">
                         {l.historicoReconquista?.map((h, i) => (
                           <div key={i} className="flex gap-3 text-xs p-2 rounded bg-muted/50 border border-border">
-                            <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <ClockIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             <span>{h}</span>
                           </div>
                         )) || <p className="text-xs text-muted-foreground text-center">Nenhuma tentativa registrada ainda.</p>}
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  <Button size="sm" variant="outline" className="text-xs h-8 border-border" onClick={() => setAgendamentoLiderado(l)}>
+                    <Calendar className="h-3.5 w-3.5 mr-1 text-primary" /> 
+                    {l.proximoContato ? format(new Date(l.proximoContato), "dd/MM 'às' HH:mm", { locale: ptBR }) : "Agendar"}
+                  </Button>
 
                   <Button size="sm" className="text-xs h-8 gradient-primary ml-auto" onClick={() => converterParaApoiador(l.id)}>
                     Convertido!
@@ -136,6 +141,27 @@ const Reconquista = () => {
           )}
         </div>
       </div>
+
+      <Dialog open={!!agendamentoLiderado} onOpenChange={(open) => !open && setAgendamentoLiderado(null)}>
+        <DialogContent className="glass-card border-border sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Agendar Próximo Contato</DialogTitle>
+            <DialogDescription>Defina quando realizar a próxima abordagem com <strong>{agendamentoLiderado?.nome}</strong>.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input 
+              type="datetime-local" 
+              value={dataAgendamento} 
+              onChange={e => setDataAgendamento(e.target.value)}
+              className="bg-muted/30 border-border" 
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAgendamentoLiderado(null)}>Cancelar</Button>
+            <Button className="gradient-primary" onClick={handleAgendar}>Salvar Agendamento</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
