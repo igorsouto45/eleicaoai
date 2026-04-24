@@ -25,25 +25,54 @@ const LIDER_COORDS: Record<string, { lat: number; lng: number }> = {
 };
 
 const MapaEstrategico = () => {
-  const maxTotal = Math.max(...bairros.map((b) => b.total));
+  const { liderados } = useLideradosStore();
+  const totalGeral = liderados.length;
 
-  // Generate heatmap points: more points = higher intensity per bairro
-  const heatPoints: [number, number, number][] = bairros.flatMap((b) => {
+  const statsPorLider = useMemo(() => {
+    const mapa = new Map();
+    liderados.forEach(l => {
+      const entry = mapa.get(l.origemId) || { 
+        id: l.origemId,
+        nome: l.origemNome, 
+        apoiadores: 0, 
+        indecisos: 0, 
+        rejeicao: 0, 
+        total: 0,
+        coords: LIDER_COORDS[l.origemId] || LIDER_COORDS["unknown"]
+      };
+      
+      entry.total++;
+      if (l.status === 'apoiador') entry.apoiadores++;
+      else if (l.status === 'indeciso') entry.indecisos++;
+      else if (l.status === 'rejeicao') entry.rejeicao++;
+      
+      mapa.set(l.origemId, entry);
+    });
+    
+    return Array.from(mapa.values()).map(l => ({
+      ...l,
+      percentualGeral: totalGeral > 0 ? (l.total / totalGeral) * 100 : 0
+    })).sort((a, b) => b.total - a.total);
+  }, [liderados, totalGeral]);
+
+  const maxTotal = Math.max(...statsPorLider.map((s) => s.total), 1);
+
+  // Generate heatmap points baseados nos líderes
+  const heatPoints: [number, number, number][] = statsPorLider.flatMap((s) => {
     const points: [number, number, number][] = [];
-    // Apoiadores (green intensity at base)
-    const intensity = b.total / maxTotal;
-    // Spread points around bairro center
-    for (let i = 0; i < Math.ceil(b.total / 20); i++) {
-      const jitterLat = (Math.random() - 0.5) * 0.015;
-      const jitterLng = (Math.random() - 0.5) * 0.015;
-      points.push([b.lat + jitterLat, b.lng + jitterLng, intensity]);
+    const intensity = s.total / maxTotal;
+    
+    for (let i = 0; i < Math.ceil(s.total * 2); i++) {
+      const jitterLat = (Math.random() - 0.5) * 0.05;
+      const jitterLng = (Math.random() - 0.5) * 0.05;
+      points.push([s.coords.lat + jitterLat, s.coords.lng + jitterLng, intensity]);
     }
     return points;
   });
 
-  const getStatusColor = (b: typeof bairros[0]) => {
-    if (b.apoiadores > b.indecisos + b.rejeicao) return "text-green-400";
-    if (b.indecisos > b.apoiadores) return "text-yellow-400";
+  const getStatusColor = (s: any) => {
+    if (s.apoiadores > s.indecisos + s.rejeicao) return "text-green-400";
+    if (s.indecisos > s.apoiadores) return "text-yellow-400";
     return "text-red-400";
   };
 
