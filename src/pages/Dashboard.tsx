@@ -31,22 +31,36 @@ const statusData = [
 ];
 
 const Dashboard = () => {
+  const { user } = useAuthStore();
+  const { liderados } = useLideradosStore();
+  const isAdmin = user?.tipo === "admin";
+
+  const myLiderados = isAdmin ? liderados : liderados.filter(l => l.origemId === user?.id);
+  
+  const stats = {
+    total: myLiderados.length,
+    apoiadores: myLiderados.filter(l => l.status === 'apoiador').length,
+    indecisos: myLiderados.filter(l => l.status === 'indeciso').length,
+    rejeicao: myLiderados.filter(l => l.status === 'rejeicao').length,
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Painel de Guerra</h1>
-          <p className="text-sm text-muted-foreground">Visão geral da campanha eleitoral</p>
+          <h1 className="text-2xl font-bold text-foreground">
+            {isAdmin ? "Painel de Guerra" : `Comando de ${user?.nome}`}
+          </h1>
+          <p className="text-sm text-muted-foreground">Bem-vindo à inteligência estratégica da campanha.</p>
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <KpiCard title="Total Eleitores" value={12753} change="+234 hoje" changeType="positive" icon={Users} />
-          <KpiCard title="Apoiadores" value={8420} change="66,1% do total" changeType="positive" icon={UserCheck} colorClass="bg-status-apoiador" />
-          <KpiCard title="Indecisos" value={3150} change="24,7% do total" changeType="neutral" icon={HelpCircle} colorClass="bg-status-indeciso" />
-          <KpiCard title="Rejeição" value={1183} change="9,2% do total" changeType="negative" icon={UserX} colorClass="bg-status-rejeicao" />
-          <KpiCard title="Crescimento" value="+4,2%" change="vs. semana anterior" changeType="positive" icon={TrendingUp} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard title={isAdmin ? "Total Eleitores" : "Meus Liderados"} value={stats.total} change="+12 hoje" changeType="positive" icon={Users} />
+          <KpiCard title="Apoiadores" value={stats.apoiadores} change="Em crescimento" changeType="positive" icon={UserCheck} colorClass="bg-status-apoiador" />
+          <KpiCard title="Indecisos" value={stats.indecisos} change="Foco em conversão" changeType="neutral" icon={HelpCircle} colorClass="bg-status-indeciso" />
+          <KpiCard title="Rejeição" value={stats.rejeicao} change="Monitorar" changeType="negative" icon={UserX} colorClass="bg-status-rejeicao" />
         </div>
 
         {/* Charts row */}
