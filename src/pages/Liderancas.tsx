@@ -150,6 +150,16 @@ const Liderancas = () => {
                 <td className="px-5 py-3.5 text-sm text-foreground">{r.cadastros}</td>
                 <td className="px-5 py-3.5 text-sm status-apoiador">{r.conversoes}</td>
                 <td className="px-5 py-3.5 text-sm text-gradient font-semibold">{r.taxa}%</td>
+                <td className="px-5 py-3.5 text-right">
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-8 text-xs hover:text-primary"
+                    onClick={() => setSelectedLider(r)}
+                  >
+                    <Fuel className="h-3.5 w-3.5 mr-1" /> Combustível
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
