@@ -146,10 +146,12 @@ const Eleitores = () => {
   }
 
   const handleTransfer = () => {
-    const lider = lideres.find(l => l.id === novoLiderId);
+    const todosLideres = Array.from(new Set(liderados.map(l => ({ id: l.origemId, nome: l.origemNome }))));
+    const uniqueLideres = Array.from(new Map([...lideres, ...todosLideres].map(item => [item.id, item])).values());
+    const lider = uniqueLideres.find(l => l.id === novoLiderId);
     if (lider && selectedLiderado) {
-      transferLiderado(selectedLiderado.id, lider.id, lider.nome);
-      toast.success(`Transferência realizada para ${lider.nome}`);
+      transferLiderado(selectedLiderado.id, lider.id, (lider as any).nome);
+      toast.success(`Transferência realizada para ${(lider as any).nome}`);
       setIsTransferOpen(false);
     }
   };
