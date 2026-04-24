@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
