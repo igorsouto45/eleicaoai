@@ -46,6 +46,16 @@ import { useLideradosStore } from "@/store/useLideradosStore";
 
 const formSchema = z.object({
   nome: z.string().min(2, "Nome é obrigatório"),
+  cpf: z.string().min(11, "CPF inválido"),
+  dataNascimento: z.string().min(10, "Data inválida"),
+  nomeMae: z.string().min(2, "Nome da mãe é obrigatório"),
+  tituloEleitoral: z.string().min(2, "Título é obrigatório"),
+  secao: z.string().min(1, "Seção é obrigatória"),
+  zona: z.string().min(1, "Zona é obrigatória"),
+  temBiometria: z.boolean(),
+  municipio: z.string().min(2, "Município é obrigatório"),
+  uf: z.string().length(2, "UF deve ter 2 caracteres"),
+  endereco: z.string().min(5, "Endereço é obrigatório"),
   telefone: z.string().min(10, "Telefone inválido"),
   bairro: z.string().min(2, "Bairro é obrigatório"),
   status: z.enum(["apoiador", "indeciso", "rejeicao"]),
@@ -97,6 +107,16 @@ const Eleitores = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: "",
+      cpf: "",
+      dataNascimento: "",
+      nomeMae: "",
+      tituloEleitoral: "",
+      secao: "",
+      zona: "",
+      temBiometria: false,
+      municipio: "Rio de Janeiro",
+      uf: "RJ",
+      endereco: "",
       telefone: "",
       bairro: "",
       status: "indeciso",
@@ -186,7 +206,7 @@ const Eleitores = () => {
 
                 {activeTab === "manual" ? (
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
                       <FormField control={form.control} name="nome" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs">Nome Completo</FormLabel>
@@ -194,6 +214,81 @@ const Eleitores = () => {
                           <FormMessage />
                         </FormItem>
                       )} />
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="cpf" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">CPF</FormLabel>
+                            <FormControl><Input placeholder="000.000.000-00" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="dataNascimento" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Data de Nascimento</FormLabel>
+                            <FormControl><Input type="date" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+
+                      <FormField control={form.control} name="nomeMae" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Nome da Mãe</FormLabel>
+                          <FormControl><Input placeholder="Nome completo da mãe" {...field} className="bg-muted/30 border-border" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <div className="grid grid-cols-3 gap-4">
+                        <FormField control={form.control} name="tituloEleitoral" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Título</FormLabel>
+                            <FormControl><Input placeholder="Nº do Título" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="secao" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Seção</FormLabel>
+                            <FormControl><Input placeholder="000" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="zona" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Zona</FormLabel>
+                            <FormControl><Input placeholder="000" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="municipio" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Município</FormLabel>
+                            <FormControl><Input placeholder="Ex: Rio de Janeiro" {...field} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="uf" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">UF</FormLabel>
+                            <FormControl><Input placeholder="RJ" {...field} maxLength={2} className="bg-muted/30 border-border" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+
+                      <FormField control={form.control} name="endereco" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Endereço Completo</FormLabel>
+                          <FormControl><Input placeholder="Rua, número, complemento" {...field} className="bg-muted/30 border-border" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={form.control} name="telefone" render={({ field }) => (
                           <FormItem>
@@ -210,23 +305,48 @@ const Eleitores = () => {
                           </FormItem>
                         )} />
                       </div>
-                      <FormField control={form.control} name="status" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Classificação Inicial</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="status" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Classificação Inicial</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="bg-muted/30 border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="bg-card border-border">
+                                <SelectItem value="apoiador">Apoiador</SelectItem>
+                                <SelectItem value="indeciso">Indeciso</SelectItem>
+                                <SelectItem value="rejeicao">Rejeição</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="temBiometria" render={({ field }) => (
+                          <FormItem className="flex flex-col justify-end pb-2">
+                            <FormLabel className="text-xs mb-2">Tem Biometria?</FormLabel>
                             <FormControl>
-                              <SelectTrigger className="bg-muted/30 border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                              <div className="flex gap-2">
+                                <Button 
+                                  type="button" 
+                                  variant={field.value ? "default" : "outline"} 
+                                  className="h-8 flex-1 text-xs" 
+                                  onClick={() => field.onChange(true)}
+                                >Sim</Button>
+                                <Button 
+                                  type="button" 
+                                  variant={!field.value ? "default" : "outline"} 
+                                  className="h-8 flex-1 text-xs" 
+                                  onClick={() => field.onChange(false)}
+                                >Não</Button>
+                              </div>
                             </FormControl>
-                            <SelectContent className="bg-card border-border">
-                              <SelectItem value="apoiador">Apoiador</SelectItem>
-                              <SelectItem value="indeciso">Indeciso</SelectItem>
-                              <SelectItem value="rejeicao">Rejeição</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <div className="flex justify-end gap-3 pt-4">
+                          </FormItem>
+                        )} />
+                      </div>
+                      
+                      <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
                         <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
                         <Button type="submit" className="gradient-primary">Salvar Liderado</Button>
                       </div>
