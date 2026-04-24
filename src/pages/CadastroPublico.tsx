@@ -139,8 +139,13 @@ const CadastroPublico = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground shadow-primary mt-2">
-              Enviar Cadastro
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full gradient-primary text-primary-foreground shadow-primary mt-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {loading ? "Processando..." : "Enviar Cadastro"}
             </Button>
           </form>
         </div>
