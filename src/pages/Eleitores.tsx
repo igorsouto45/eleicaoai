@@ -453,8 +453,11 @@ const Eleitores = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="glass-card border-border shadow-2xl">
                       <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
-                      <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
+                      <DropdownMenuItem className="text-xs cursor-pointer" onClick={() => { setSelectedLiderado(e); setIsCrmOpen(true); }}>
                         <Eye className="mr-2 h-3 w-3" /> Ver Perfil Completo
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-xs cursor-pointer" onClick={() => gerarFichaPDF(e)}>
+                        <Printer className="mr-2 h-3 w-3" /> Imprimir Ficha
                       </DropdownMenuItem>
                       {isAdmin && (
                         <>
