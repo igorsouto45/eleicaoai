@@ -75,5 +75,8 @@ export const gerarFichaPDF = (dados?: any, download: boolean = true) => {
   doc.setTextColor(150);
   doc.text("Gerado por Comando Eleitoral AI - Sistema de Gestão Estratégica", margin, 285);
 
-  doc.save(`ficha_${dados?.nome || "modelo"}.pdf`);
+  if (download) {
+    doc.save(`ficha_${dados?.nome || "modelo"}.pdf`);
+  }
+  return doc;
 };
