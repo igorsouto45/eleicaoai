@@ -25,13 +25,77 @@ const ranking = [
 
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
 
-const Liderancas = () => (
-  <AppLayout>
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Gestão de Lideranças</h1>
-        <p className="text-sm text-muted-foreground">Ranking e desempenho da equipe</p>
-      </div>
+const Liderancas = () => {
+  const { registrosCombustivel, registrarCombustivel } = useLideradosStore();
+  const [selectedLider, setSelectedLider] = useState<any>(null);
+  const [fuelValue, setFuelValue] = useState("");
+  const [kmValue, setKmValue] = useState("");
+
+  const handleFuelSubmit = () => {
+    if (!selectedLider || !fuelValue || !kmValue) {
+      toast.error("Preencha todos os campos");
+      return;
+    }
+    registrarCombustivel(
+      selectedLider.id, 
+      selectedLider.nome, 
+      Number(fuelValue), 
+      Number(kmValue)
+    );
+    setFuelValue("");
+    setKmValue("");
+    setSelectedLider(null);
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Gestão de Lideranças</h1>
+            <p className="text-sm text-muted-foreground">Ranking e controle de ajuda de custo</p>
+          </div>
+
+          <Dialog open={!!selectedLider} onOpenChange={(open) => !open && setSelectedLider(null)}>
+            <DialogContent className="glass-card border-border sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Fuel className="h-5 w-5 text-primary" />
+                  Ajuda de Combustível
+                </DialogTitle>
+                <DialogDescription>
+                  Registrar pagamento para <strong>{selectedLider?.nome}</strong>.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium">Valor Pago (R$)</label>
+                  <Input 
+                    type="number" 
+                    placeholder="0,00" 
+                    value={fuelValue} 
+                    onChange={e => setFuelValue(e.target.value)}
+                    className="bg-muted/30 border-border" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium">Kilometragem Atual (KM)</label>
+                  <Input 
+                    type="number" 
+                    placeholder="KM no painel" 
+                    value={kmValue} 
+                    onChange={e => setKmValue(e.target.value)}
+                    className="bg-muted/30 border-border" 
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setSelectedLider(null)}>Cancelar</Button>
+                <Button className="gradient-primary" onClick={handleFuelSubmit}>Confirmar Pagamento</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
 
       {/* Top 3 cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
