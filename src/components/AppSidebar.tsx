@@ -55,7 +55,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {navItems.map((item) => {
+        {filteredItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
@@ -76,6 +76,11 @@ const AppSidebar = () => {
 
       {/* Footer */}
       <div className="border-t border-border p-3 space-y-1">
+        <div className="px-3 py-2 mb-2">
+          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Usuário</p>
+          <p className="text-xs font-medium text-foreground truncate">{user?.nome || 'Convidado'}</p>
+          <p className="text-[9px] text-primary font-bold uppercase">{user?.tipo === 'admin' ? 'Administrador' : 'Líder'}</p>
+        </div>
         <Link
           to="/configuracoes"
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-foreground transition-all"
@@ -83,13 +88,13 @@ const AppSidebar = () => {
           <Settings className="h-4 w-4" />
           Configurações
         </Link>
-        <Link
-          to="/login"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-foreground transition-all"
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-destructive transition-all"
         >
           <LogOut className="h-4 w-4" />
           Sair
-        </Link>
+        </button>
       </div>
     </aside>
   );
