@@ -376,68 +376,107 @@ const Eleitores = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="glass-card overflow-hidden rounded-xl">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-[10px] uppercase font-bold text-muted-foreground">
-                <th className="px-5 py-3 text-left">Nome</th>
-                <th className="px-5 py-3 text-left">Contato</th>
-                <th className="px-5 py-3 text-left">Bairro</th>
-                <th className="px-5 py-3 text-left">Status</th>
-                {isAdmin && <th className="px-5 py-3 text-left text-primary">Responsável</th>}
-                <th className="px-5 py-3 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((e) => (
-                <tr key={e.id} className="border-b border-border/50 transition-colors hover:bg-muted/30">
-                  <td className="px-5 py-3.5 font-medium">{e.nome}</td>
-                  <td className="px-5 py-3.5 text-muted-foreground">{e.telefone}</td>
-                  <td className="px-5 py-3.5 text-muted-foreground">{e.bairro}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusConfig[e.status].className}`}>
-                      {statusConfig[e.status].label}
-                    </span>
-                  </td>
-                  {isAdmin && (
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                          {e.origemNome[0]}
-                        </div>
-                        <span className="text-xs">{e.origemNome}</span>
-                      </div>
-                    </td>
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((e) => (
+            <div key={e.id} className="glass-card p-5 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group relative overflow-hidden">
+              {/* Background Glow */}
+              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-colors" />
+              
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
+                    {e.nome.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-foreground leading-none mb-1">{e.nome}</h3>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{e.bairro}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter ${statusConfig[e.status].className}`}>
+                    {statusConfig[e.status].label}
+                  </span>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-white/10"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="glass-card border-border shadow-2xl">
+                      <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
+                      <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
+                        <Eye className="mr-2 h-3 w-3" /> Ver Perfil Completo
+                      </DropdownMenuItem>
+                      {isAdmin && (
+                        <>
+                          <DropdownMenuSeparator className="bg-border" />
+                          <DropdownMenuItem 
+                            className="text-xs cursor-pointer text-primary"
+                            onClick={() => { setSelectedLiderado(e); setIsTransferOpen(true); }}
+                          >
+                            <ArrowLeftRight className="mr-2 h-3 w-3" /> Transferir Líder
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <p className="text-[9px] text-muted-foreground uppercase font-bold mb-0.5">CPF</p>
+                    <p className="text-xs text-foreground font-medium">{e.cpf || "---"}</p>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <p className="text-[9px] text-muted-foreground uppercase font-bold mb-0.5">WhatsApp</p>
+                    <p className="text-xs text-foreground font-medium">{e.telefone}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                    <p className="text-[9px] text-muted-foreground uppercase font-bold mb-0.5">Título</p>
+                    <p className="text-xs text-foreground font-medium truncate">{e.tituloEleitoral || "---"}</p>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+                    <p className="text-[9px] text-muted-foreground uppercase font-bold mb-0.5">Zona</p>
+                    <p className="text-xs text-foreground font-medium">{e.zona || "---"}</p>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+                    <p className="text-[9px] text-muted-foreground uppercase font-bold mb-0.5">Seção</p>
+                    <p className="text-xs text-foreground font-medium">{e.secao || "---"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                <div className="flex items-center gap-1.5">
+                  <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                    {e.origemNome.charAt(0)}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground italic truncate max-w-[100px]">
+                    Cadastrado por {isAdmin ? e.origemNome : "você"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {e.temBiometria ? (
+                    <Badge variant="outline" className="h-4 px-1.5 text-[8px] bg-success/10 text-success border-success/20 uppercase">Biometria OK</Badge>
+                  ) : (
+                    <Badge variant="outline" className="h-4 px-1.5 text-[8px] bg-muted text-muted-foreground uppercase">Sem Biometria</Badge>
                   )}
-                  <td className="px-5 py-3.5 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="glass-card border-border">
-                        <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
-                        <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
-                          <Eye className="mr-2 h-3 w-3" /> Ver Perfil
-                        </DropdownMenuItem>
-                        {isAdmin && (
-                          <>
-                            <DropdownMenuSeparator className="bg-border" />
-                            <DropdownMenuItem 
-                              className="text-xs cursor-pointer text-primary"
-                              onClick={() => { setSelectedLiderado(e); setIsTransferOpen(true); }}
-                            >
-                              <ArrowLeftRight className="mr-2 h-3 w-3" /> Transferir Líder
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="col-span-full py-20 text-center glass-card rounded-2xl border-dashed border-2 border-white/10">
+              <User className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+              <p className="text-muted-foreground">Nenhum liderado encontrado.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -474,5 +513,7 @@ const Eleitores = () => {
     </AppLayout>
   );
 };
+
+export default Eleitores;
 
 export default Eleitores;
