@@ -1,13 +1,16 @@
-import { useState } from "react";
-import { CheckCircle, Brain } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle, Brain, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useParams } from "react-router-dom";
 
 const bairros = ["Centro", "Jardim América", "Vila Nova", "Boa Vista", "São José", "Liberdade", "Santa Cruz", "Bela Vista"];
 
 const CadastroPublico = () => {
+  const { codigo } = useParams();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ nome: "", telefone: "", bairro: "", intencao: "" });
   const [bairroSuggestions, setBairroSuggestions] = useState<string[]>([]);
 
@@ -26,7 +29,16 @@ const CadastroPublico = () => {
       toast.error("Preencha todos os campos");
       return;
     }
-    setSubmitted(true);
+    
+    setLoading(true);
+    // Simular registro com o código do líder
+    console.log("Cadastrando eleitor via líder:", codigo, form);
+    
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+      toast.success(`Cadastro vinculado ao líder: ${codigo}`);
+    }, 1500);
   };
 
   if (submitted) {
@@ -127,8 +139,13 @@ const CadastroPublico = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground shadow-primary mt-2">
-              Enviar Cadastro
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full gradient-primary text-primary-foreground shadow-primary mt-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {loading ? "Processando..." : "Enviar Cadastro"}
             </Button>
           </form>
         </div>

@@ -1,15 +1,27 @@
 import { useState, useRef } from "react";
-import { Camera, FileText, Upload, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Camera, FileText, Upload, CheckCircle2, Loader2, AlertCircle, History, XCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Tesseract from "tesseract.js";
+import { Badge } from "@/components/ui/badge";
+
+interface ScanResult {
+  id: string;
+  nome: string;
+  telefone: string;
+  bairro: string;
+  status: 'processando' | 'concluido' | 'falhou';
+  data: string;
+  originalImage?: string;
+}
 
 const ScannerFicha = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Partial<ScanResult> | null>(null);
+  const [history, setHistory] = useState<ScanResult[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,10 +36,28 @@ const ScannerFicha = () => {
     }
   };
 
+  const validatePhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, "");
+    return digits.length >= 10 && digits.length <= 11;
+  };
+
   const processImage = async (imageSrc: string) => {
     setIsScanning(true);
     setProgress(0);
     setResult(null);
+
+    const scanId = Math.random().toString(36).substr(2, 9);
+    const newEntry: ScanResult = {
+      id: scanId,
+      nome: "Processando...",
+      telefone: "",
+      bairro: "",
+      status: 'processando',
+      data: new Date().toLocaleTimeString(),
+      originalImage: imageSrc
+    };
+    
+    setHistory(prev => [newEntry, ...prev]);
 
     try {
       const { data: { text } } = await Tesseract.recognize(
@@ -35,126 +65,160 @@ const ScannerFicha = () => {
         'por',
         {
           logger: m => {
-            if (m.status === 'recognizing text') {
-              setProgress(Math.floor(m.progress * 100));
-            }
+            if (m.status === 'recognizing text') setProgress(Math.floor(m.progress * 100));
           }
         }
       );
 
-      // Lógica simples de extração baseada em palavras-chave comuns em fichas
       const lines = text.split('\n');
-      const extracted: any = {
+      const extracted: Partial<ScanResult> = {
         nome: "",
         telefone: "",
         bairro: "",
-        raw: text
       };
 
-      // Tenta encontrar campos (muito básico, para demonstração)
+      // Regras de extração aprimoradas
       lines.forEach(line => {
-        const lowerLine = line.toLowerCase();
-        if (lowerLine.includes('nome:')) extracted.nome = line.split(/nome:/i)[1]?.trim();
-        if (lowerLine.includes('tel') || lowerLine.includes('cel')) extracted.telefone = line.split(/(tel|cel|contato):/i)[2]?.trim();
-        if (lowerLine.includes('bairro:')) extracted.bairro = line.split(/bairro:/i)[1]?.trim();
+        const cleanLine = line.trim();
+        if (/nome/i.test(cleanLine)) extracted.nome = cleanLine.split(/[:\-_]/)[1]?.trim() || cleanLine.replace(/nome/i, "").trim();
+        if (/(tel|cel|contato|fone)/i.test(cleanLine)) {
+          const found = cleanLine.match(/(\(?\d{2}\)?\s?\d{4,5}-?\d{4})/);
+          if (found) extracted.telefone = found[0];
+        }
+        if (/bairro/i.test(cleanLine)) extracted.bairro = cleanLine.split(/[:\-_]/)[1]?.trim() || cleanLine.replace(/bairro/i, "").trim();
       });
 
       setResult(extracted);
-      toast.success("Ficha processada com sucesso!");
+      setHistory(prev => prev.map(h => h.id === scanId ? { ...h, ...extracted as ScanResult, status: 'concluido' } : h));
+      toast.success("Ficha processada!");
     } catch (error) {
       console.error(error);
+      setHistory(prev => prev.map(h => h.id === scanId ? { ...h, status: 'falhou', nome: "Erro na leitura" } : h));
       toast.error("Erro ao processar imagem.");
     } finally {
       setIsScanning(false);
     }
   };
 
+  const saveToCRM = (data: Partial<ScanResult>) => {
+    if (!data.nome || !data.telefone) {
+      toast.error("Nome e telefone são obrigatórios.");
+      return;
+    }
+    toast.success(`${data.nome} salvo no CRM como INDECISO.`);
+    setPreview(null);
+    setResult(null);
+  };
+
+  const downloadTemplate = () => {
+    // Simular download do modelo oficial
+    toast.info("Baixando modelo oficial de ficha...");
+    window.open("https://placehold.co/600x800/262626/white?text=MODELO+OFICIAL+COMANDO+ELEITORAL\n\nNOME:____________________\n\nCONTATO:_________________\n\nBAIRRO:__________________", "_blank");
+  };
+
   return (
-    <Card className="glass-card border-none overflow-hidden">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          Escaneamento de Ficha
-        </CardTitle>
-        <CardDescription>
-          Faça upload da foto de uma ficha preenchida manualmente para extração automática.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!preview ? (
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-border rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/30 transition-colors"
-          >
-            <Upload className="h-10 w-10 text-muted-foreground mb-4" />
-            <p className="text-sm font-medium text-foreground">Clique para enviar ou arraste a foto</p>
-            <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou PDF</p>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*" 
-              onChange={handleFileUpload} 
-            />
+    <div className="space-y-4">
+      <Card className="glass-card border-none overflow-hidden">
+        <CardHeader className="pb-4 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Escaneamento de Ficha
+            </CardTitle>
+            <CardDescription>Extração inteligente de dados via OCR.</CardDescription>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-border bg-black/20">
-              <img src={preview} alt="Preview" className="w-full h-full object-contain" />
-              {isScanning && (
-                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                  <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-                  <p className="text-sm font-bold text-white">Processando... {progress}%</p>
+          <Button variant="outline" size="sm" className="text-[10px] h-8" onClick={downloadTemplate}>
+            <Printer className="h-3 w-3 mr-1" /> Modelo PDF
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!preview ? (
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/30 transition-colors"
+            >
+              <Upload className="h-8 w-8 text-muted-foreground mb-3" />
+              <p className="text-xs font-medium text-foreground">Clique para enviar ficha</p>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-border bg-black/20">
+                <img src={preview} alt="Preview" className="w-full h-full object-contain" />
+                {isScanning && (
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+                    <p className="text-sm font-bold text-white">{progress}%</p>
+                  </div>
+                )}
+              </div>
+              
+              {result && (
+                <div className="bg-muted/50 rounded-lg p-3 space-y-3 animate-in fade-in slide-in-from-top-2 border border-border/50">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Nome</p>
+                      <input 
+                        className="w-full bg-transparent text-sm font-medium focus:outline-none border-b border-primary/20" 
+                        value={result.nome} 
+                        onChange={e => setResult({...result, nome: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Telefone</p>
+                      <input 
+                        className={`w-full bg-transparent text-sm focus:outline-none border-b ${validatePhone(result.telefone || "") ? 'border-primary/20' : 'border-destructive'}`}
+                        value={result.telefone} 
+                        onChange={e => setResult({...result, telefone: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Bairro</p>
+                      <input 
+                        className="w-full bg-transparent text-sm focus:outline-none border-b border-primary/20" 
+                        value={result.bairro} 
+                        onChange={e => setResult({...result, bairro: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <Button size="sm" className="w-full gradient-primary text-xs" onClick={() => saveToCRM(result)}>
+                    Confirmar e Salvar no CRM
+                  </Button>
                 </div>
               )}
             </div>
-            
-            {result && (
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3 animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center gap-2 text-success mb-2 font-semibold text-sm">
-                  <CheckCircle2 className="h-4 w-4" /> Dados Detectados
+          )}
+        </CardContent>
+      </Card>
+
+      {history.length > 0 && (
+        <Card className="glass-card border-none">
+          <CardHeader className="py-3">
+            <CardTitle className="text-xs flex items-center gap-2 text-muted-foreground">
+              <History className="h-3.5 w-3.5" /> Histórico Recente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 pb-3 space-y-2">
+            {history.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/30">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium truncate max-w-[120px]">{item.nome}</span>
+                  <span className="text-[10px] text-muted-foreground">{item.data} • {item.bairro || 'Sem bairro'}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Nome</p>
-                    <p className="text-sm text-foreground">{result.nome || "Não detectado"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Telefone</p>
-                    <p className="text-sm text-foreground">{result.telefone || "Não detectado"}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Bairro</p>
-                    <p className="text-sm text-foreground">{result.bairro || "Não detectado"}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button size="sm" className="flex-1 gradient-primary text-xs" onClick={() => toast.success("Dados salvos!")}>
-                    Confirmar e Salvar
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1 text-xs" onClick={() => { setPreview(null); setResult(null); }}>
-                    Tentar Novamente
-                  </Button>
+                <div className="flex items-center gap-2">
+                  {item.status === 'processando' && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                  {item.status === 'concluido' && <CheckCircle2 className="h-3 w-3 text-success" />}
+                  {item.status === 'falhou' && <XCircle className="h-3 w-3 text-destructive" />}
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 uppercase">
+                    {item.status}
+                  </Badge>
                 </div>
               </div>
-            )}
-            
-            {!isScanning && !result && (
-              <Button variant="outline" className="w-full text-xs" onClick={() => setPreview(null)}>
-                Trocar Imagem
-              </Button>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-start gap-3 bg-primary/5 rounded-lg p-3 border border-primary/10">
-          <AlertCircle className="h-4 w-4 text-primary mt-0.5" />
-          <div className="text-[11px] text-muted-foreground leading-relaxed">
-            <strong>Dica:</strong> Para melhores resultados, garanta boa iluminação e que a ficha esteja em uma superfície plana. Use o modelo de ficha oficial do sistema.
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 
