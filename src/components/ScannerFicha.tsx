@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import Tesseract from "tesseract.js";
 import { Badge } from "@/components/ui/badge";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface ScanResult {
   id: string;
@@ -17,6 +19,8 @@ interface ScanResult {
 }
 
 const ScannerFicha = () => {
+  const { user } = useAuthStore();
+  const { liderados, addLiderado } = useLideradosStore();
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
