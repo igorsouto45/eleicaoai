@@ -8,6 +8,7 @@ import "leaflet/dist/leaflet.css";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 
 // Fix default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
