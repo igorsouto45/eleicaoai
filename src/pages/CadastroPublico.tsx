@@ -1,17 +1,36 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, Brain, Loader2 } from "lucide-react";
+import { CheckCircle, Brain, Loader2, MapPin, User, Fingerprint, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
+import { useLideradosStore } from "@/store/useLideradosStore";
 
 const bairros = ["Centro", "Jardim América", "Vila Nova", "Boa Vista", "São José", "Liberdade", "Santa Cruz", "Bela Vista"];
 
 const CadastroPublico = () => {
   const { codigo } = useParams();
+  const { addLiderado } = useLideradosStore();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ nome: "", telefone: "", bairro: "", intencao: "" });
+  
+  const [form, setForm] = useState({ 
+    nome: "", 
+    cpf: "",
+    dataNascimento: "",
+    nomeMae: "",
+    tituloEleitoral: "",
+    secao: "",
+    zona: "",
+    temBiometria: false,
+    municipio: "Rio de Janeiro",
+    uf: "RJ",
+    endereco: "",
+    telefone: "", 
+    bairro: "", 
+    intencao: "" 
+  });
+  
   const [bairroSuggestions, setBairroSuggestions] = useState<string[]>([]);
 
   const handleBairroChange = (val: string) => {
@@ -25,19 +44,49 @@ const CadastroPublico = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome || !form.telefone || !form.bairro || !form.intencao) {
-      toast.error("Preencha todos os campos");
+    
+    // Validação básica dos campos obrigatórios
+    if (!form.nome || !form.cpf || !form.telefone || !form.bairro || !form.intencao || !form.nomeMae || !form.endereco) {
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
     
     setLoading(true);
-    // Simular registro com o código do líder
-    console.log("Cadastrando eleitor via líder:", codigo, form);
     
+    // Mapear intenção para o status do CRM
+    const statusMap: Record<string, 'apoiador' | 'indeciso' | 'rejeicao'> = {
+      'sim': 'apoiador',
+      'nao': 'rejeicao',
+      'indeciso': 'indeciso'
+    };
+
+    // Simular nome do líder baseado no código
+    const liderNome = codigo === "joao-lider" ? "João Líder" : (codigo === "ana-lider" ? "Ana Líder" : "Líder via QR");
+
     setTimeout(() => {
+      addLiderado({
+        nome: form.nome,
+        cpf: form.cpf,
+        dataNascimento: form.dataNascimento,
+        nomeMae: form.nomeMae,
+        tituloEleitoral: form.tituloEleitoral,
+        secao: form.secao,
+        zona: form.zona,
+        temBiometria: form.temBiometria,
+        municipio: form.municipio,
+        uf: form.uf,
+        endereco: form.endereco,
+        telefone: form.telefone,
+        bairro: form.bairro,
+        status: statusMap[form.intencao],
+        origemId: codigo || "qr-public",
+        origemNome: liderNome,
+        data: new Date().toISOString().split('T')[0],
+      });
+
       setLoading(false);
       setSubmitted(true);
-      toast.success(`Cadastro vinculado ao líder: ${codigo}`);
+      toast.success(`Cadastro enviado com sucesso!`);
     }, 1500);
   };
 
