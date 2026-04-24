@@ -65,8 +65,19 @@ export const useLideradosStore = create<LideradosState>()(
   persist(
     (set, get) => ({
       liderados: [
-        { id: '1', nome: "Maria Silva", telefone: "(11) 99999-1234", bairro: "Centro", status: "apoiador", origemId: "2", origemNome: "João Líder", data: "2024-03-15", sincronizado: true, probabilidadeReconquista: 95 },
-        { id: '2', nome: "Carlos Santos", telefone: "(11) 99888-5678", bairro: "Jardim América", status: "indeciso", origemId: "3", origemNome: "Ana Líder", data: "2024-03-14", sincronizado: true, probabilidadeReconquista: 65, historicoReconquista: ["Tentativa 1: WhatsApp enviado em 20/04"] },
+        { 
+          id: '1', nome: "Maria Silva", cpf: "123.456.789-00", dataNascimento: "1985-05-20", nomeMae: "Lucia Silva", 
+          tituloEleitoral: "1234567890", secao: "001", zona: "002", temBiometria: true, municipio: "Rio de Janeiro", 
+          uf: "RJ", endereco: "Rua das Flores, 123", telefone: "(21) 99999-1234", bairro: "Centro", 
+          status: "apoiador", origemId: "2", origemNome: "João Líder", data: "2024-03-15", sincronizado: true, probabilidadeReconquista: 95 
+        },
+        { 
+          id: '2', nome: "Carlos Santos", cpf: "987.654.321-11", dataNascimento: "1990-10-10", nomeMae: "Ana Santos", 
+          tituloEleitoral: "0987654321", secao: "010", zona: "005", temBiometria: false, municipio: "Rio de Janeiro", 
+          uf: "RJ", endereco: "Av. Principal, 456", telefone: "(21) 99888-5678", bairro: "Jardim América", 
+          status: "indeciso", origemId: "3", origemNome: "Ana Líder", data: "2024-03-14", sincronizado: true, probabilidadeReconquista: 65, 
+          historicoReconquista: ["Tentativa 1: WhatsApp enviado em 20/04"] 
+        },
       ],
       notificacoes: [],
       registrosCombustivel: [],
