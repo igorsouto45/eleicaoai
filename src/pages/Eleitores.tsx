@@ -69,8 +69,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 const lideres = [
-  { id: "2", nome: "João Líder" },
-  { id: "3", nome: "Ana Líder" },
+  { id: "1", nome: "Igor Souto" },
 ];
 
 const Eleitores = () => {
