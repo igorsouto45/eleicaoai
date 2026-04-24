@@ -11,6 +11,16 @@ import { useAuthStore } from "@/store/useAuthStore";
 interface ScanResult {
   id: string;
   nome: string;
+  cpf: string;
+  dataNascimento: string;
+  nomeMae: string;
+  tituloEleitoral: string;
+  secao: string;
+  zona: string;
+  temBiometria: boolean;
+  municipio: string;
+  uf: string;
+  endereco: string;
   telefone: string;
   bairro: string;
   status: 'processando' | 'concluido' | 'falhou';
