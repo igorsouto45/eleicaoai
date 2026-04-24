@@ -550,9 +550,13 @@ const Eleitores = () => {
               <Select onValueChange={setNovoLiderId}>
                 <SelectTrigger className="bg-card border-border"><SelectValue placeholder="Escolha um líder" /></SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  {lideres.map(l => (
-                    <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>
-                  ))}
+                  {(() => {
+                    const todosLideres = Array.from(new Set(liderados.map(l => ({ id: l.origemId, nome: l.origemNome }))));
+                    const uniqueLideres = Array.from(new Map([...lideres, ...todosLideres].map(item => [item.id, item])).values());
+                    return uniqueLideres.map(l => (
+                      <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>
+                    ));
+                  })()}
                 </SelectContent>
               </Select>
             </div>
