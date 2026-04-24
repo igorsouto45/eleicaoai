@@ -155,8 +155,52 @@ const Liderancas = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Fuel History */}
+      <div className="glass-card rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <HistoryIcon className="h-5 w-5 text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">Histórico de Ajuda de Custo</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="border-b border-border text-muted-foreground uppercase font-bold tracking-wider">
+                <th className="px-4 py-2">Data</th>
+                <th className="px-4 py-2">Líder</th>
+                <th className="px-4 py-2">Valor</th>
+                <th className="px-4 py-2">KM Atual</th>
+                <th className="px-4 py-2">KM Rodados</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registrosCombustivel.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Nenhum registro encontrado.</td>
+                </tr>
+              ) : (
+                registrosCombustivel.map((r) => (
+                  <tr key={r.id} className="border-b border-border/50">
+                    <td className="px-4 py-3">{format(new Date(r.data), "dd/MM/yy HH:mm", { locale: ptBR })}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">{r.liderNome}</td>
+                    <td className="px-4 py-3 text-success font-bold">R$ {r.valor.toFixed(2)}</td>
+                    <td className="px-4 py-3">{r.kmAtual} km</td>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-1">
+                        <Calculator className="h-3 w-3 text-primary" />
+                        +{r.kmRodados} km
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </AppLayout>
 );
+}
 
 export default Liderancas;
