@@ -513,7 +513,4 @@ const Eleitores = () => {
     </AppLayout>
   );
 };
-
-export default Eleitores;
-
 export default Eleitores;
