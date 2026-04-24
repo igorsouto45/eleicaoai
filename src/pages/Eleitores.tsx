@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText, ArrowLeftRight, MoreHorizontal, User } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText, ArrowLeftRight, MoreHorizontal, User, Fingerprint, MapPin, Printer } from "lucide-react";
+import { gerarFichaPDF } from "@/utils/pdfGenerator";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
