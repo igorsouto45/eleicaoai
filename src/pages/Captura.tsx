@@ -8,8 +8,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 const mockLinks = [
   { id: "1", usuario: "Administrador", codigo: "admin", cadastros: 0, conversoes: 0 },
-  { id: "2", usuario: "João Líder", codigo: "joao-lider", cadastros: 142, conversoes: 98 },
-  { id: "3", usuario: "Ana Líder", codigo: "ana-lider", cadastros: 89, conversoes: 61 },
 ];
 
 const Captura = () => {
