@@ -202,7 +202,7 @@ const Eleitores = () => {
                       />
                       <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-                        <Button type="submit" className="gradient-primary">Salvar Eleitor</Button>
+                        <Button type="submit" className="gradient-primary">Salvar Liderado</Button>
                       </div>
                     </form>
                   </Form>
