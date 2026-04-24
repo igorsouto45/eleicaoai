@@ -1,29 +1,48 @@
-import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History } from "lucide-react";
+import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History, Search, Calendar, Filter, Clock as ClockIcon } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
   DialogTrigger,
-  DialogDescription 
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 
 const Reconquista = () => {
-  const { liderados, updateStatus } = useLideradosStore();
+  const { liderados, updateStatus, agendarContato } = useLideradosStore();
+  const [search, setSearch] = useState("");
+  const [filterBairro, setFilterBairro] = useState("");
+  const [agendamentoLiderado, setAgendamentoLiderado] = useState<any>(null);
+  const [dataAgendamento, setDataAgendamento] = useState("");
   
   // Filtra indecisos e rejeição, ordenando por probabilidade (maior primeiro)
   const listaReconquista = liderados
-    .filter(l => l.status === 'indeciso' || l.status === 'rejeicao')
+    .filter(l => (l.status === 'indeciso' || l.status === 'rejeicao'))
+    .filter(l => l.nome.toLowerCase().includes(search.toLowerCase()) || l.bairro.toLowerCase().includes(search.toLowerCase()))
+    .filter(l => !filterBairro || l.bairro === filterBairro)
     .sort((a, b) => (b.probabilidadeReconquista || 0) - (a.probabilidadeReconquista || 0));
+
+  const bairros = Array.from(new Set(liderados.map(l => l.bairro)));
+
+  const handleAgendar = () => {
+    if (!agendamentoLiderado || !dataAgendamento) return;
+    agendarContato(agendamentoLiderado.id, dataAgendamento);
+    setAgendamentoLiderado(null);
+    setDataAgendamento("");
+  };
 
   const handleAction = (id: string, action: string) => {
     toast.success(`Ação registrada: ${action}`);
-    // Aqui poderíamos adicionar ao histórico
   };
 
   const converterParaApoiador = (id: string) => {
@@ -34,9 +53,34 @@ const Reconquista = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Operação Reconquista</h1>
-          <p className="text-sm text-muted-foreground">Foco estratégico em converter indecisos e mitigar rejeições</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Operação Reconquista</h1>
+            <p className="text-sm text-muted-foreground">Foco estratégico em converter indecisos e mitigar rejeições</p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="relative w-48">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                className="pl-8 bg-card border-border h-9 text-xs" 
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBairro} 
+                onChange={e => setFilterBairro(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none"
+              >
+                <option value="">Todos os Bairros</option>
+                {bairros.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -100,13 +144,18 @@ const Reconquista = () => {
                       <div className="space-y-3 py-4">
                         {l.historicoReconquista?.map((h, i) => (
                           <div key={i} className="flex gap-3 text-xs p-2 rounded bg-muted/50 border border-border">
-                            <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <ClockIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             <span>{h}</span>
                           </div>
                         )) || <p className="text-xs text-muted-foreground text-center">Nenhuma tentativa registrada ainda.</p>}
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  <Button size="sm" variant="outline" className="text-xs h-8 border-border" onClick={() => setAgendamentoLiderado(l)}>
+                    <Calendar className="h-3.5 w-3.5 mr-1 text-primary" /> 
+                    {l.proximoContato ? format(new Date(l.proximoContato), "dd/MM 'às' HH:mm", { locale: ptBR }) : "Agendar"}
+                  </Button>
 
                   <Button size="sm" className="text-xs h-8 gradient-primary ml-auto" onClick={() => converterParaApoiador(l.id)}>
                     Convertido!
@@ -117,6 +166,27 @@ const Reconquista = () => {
           )}
         </div>
       </div>
+
+      <Dialog open={!!agendamentoLiderado} onOpenChange={(open) => !open && setAgendamentoLiderado(null)}>
+        <DialogContent className="glass-card border-border sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Agendar Próximo Contato</DialogTitle>
+            <DialogDescription>Defina quando realizar a próxima abordagem com <strong>{agendamentoLiderado?.nome}</strong>.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input 
+              type="datetime-local" 
+              value={dataAgendamento} 
+              onChange={e => setDataAgendamento(e.target.value)}
+              className="bg-muted/30 border-border" 
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAgendamentoLiderado(null)}>Cancelar</Button>
+            <Button className="gradient-primary" onClick={handleAgendar}>Salvar Agendamento</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };

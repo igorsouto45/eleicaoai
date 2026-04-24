@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import Tesseract from "tesseract.js";
 import { Badge } from "@/components/ui/badge";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface ScanResult {
   id: string;
@@ -17,6 +19,8 @@ interface ScanResult {
 }
 
 const ScannerFicha = () => {
+  const { user } = useAuthStore();
+  const { liderados, addLiderado } = useLideradosStore();
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
@@ -105,7 +109,17 @@ const ScannerFicha = () => {
       toast.error("Nome e telefone são obrigatórios.");
       return;
     }
-    toast.success(`${data.nome} salvo no CRM como INDECISO.`);
+
+    addLiderado({
+      nome: data.nome || "",
+      telefone: data.telefone || "",
+      bairro: data.bairro || "",
+      status: "indeciso",
+      origemId: user?.id || "unknown",
+      origemNome: user?.nome || "Scanner",
+      data: new Date().toISOString().split('T')[0],
+    });
+
     setPreview(null);
     setResult(null);
   };
