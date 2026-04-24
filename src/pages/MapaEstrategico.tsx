@@ -1,10 +1,13 @@
-import { MapPin } from "lucide-react";
+import { Trophy, Users, TrendingUp, PieChart as PieIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import HeatmapLayer from "@/components/HeatmapLayer";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useMemo } from "react";
 
 // Fix default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -14,20 +17,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-const bairros = [
-  { nome: "Centro", apoiadores: 220, indecisos: 89, rejeicao: 31, total: 340, lat: -22.9068, lng: -43.1729 },
-  { nome: "Copacabana", apoiadores: 160, indecisos: 78, rejeicao: 42, total: 280, lat: -22.9711, lng: -43.1826 },
-  { nome: "Tijuca", apoiadores: 130, indecisos: 52, rejeicao: 28, total: 210, lat: -22.9325, lng: -43.2436 },
-  { nome: "Barra da Tijuca", apoiadores: 110, indecisos: 40, rejeicao: 25, total: 175, lat: -23.0004, lng: -43.3658 },
-  { nome: "Madureira", apoiadores: 80, indecisos: 38, rejeicao: 22, total: 140, lat: -22.8731, lng: -43.3392 },
-  { nome: "Méier", apoiadores: 65, indecisos: 30, rejeicao: 15, total: 110, lat: -22.9025, lng: -43.2822 },
-  { nome: "Campo Grande", apoiadores: 55, indecisos: 25, rejeicao: 10, total: 90, lat: -22.9035, lng: -43.5618 },
-  { nome: "Botafogo", apoiadores: 40, indecisos: 20, rejeicao: 8, total: 68, lat: -22.9519, lng: -43.1857 },
-  { nome: "Ipanema", apoiadores: 95, indecisos: 35, rejeicao: 18, total: 148, lat: -22.9838, lng: -43.2096 },
-  { nome: "Santa Cruz", apoiadores: 45, indecisos: 60, rejeicao: 35, total: 140, lat: -22.9135, lng: -43.6868 },
-  { nome: "Bangu", apoiadores: 70, indecisos: 55, rejeicao: 30, total: 155, lat: -22.8749, lng: -43.4631 },
-  { nome: "Penha", apoiadores: 50, indecisos: 45, rejeicao: 25, total: 120, lat: -22.8383, lng: -43.2781 },
-];
+// Coordenadas centrais aproximadas para representação no mapa (Rio de Janeiro)
+const LIDER_COORDS: Record<string, { lat: number; lng: number }> = {
+  "2": { lat: -22.9068, lng: -43.1729 }, // João Líder (Centro)
+  "3": { lat: -22.9711, lng: -43.1826 }, // Ana Líder (Copacabana)
+  "unknown": { lat: -22.9325, lng: -43.2436 }, // Sistema/Outros (Tijuca)
+};
 
 const MapaEstrategico = () => {
   const maxTotal = Math.max(...bairros.map((b) => b.total));
