@@ -1,13 +1,26 @@
-import { Trophy, Medal, TrendingUp } from "lucide-react";
+import { Trophy, Medal, TrendingUp, Fuel, Calculator, History as HistoryIcon, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 const ranking = [
-  { pos: 1, nome: "João Silva", tipo: "Líder", cadastros: 142, conversoes: 98, taxa: 69 },
-  { pos: 2, nome: "Ana Costa", tipo: "Líder", cadastros: 89, conversoes: 61, taxa: 68 },
-  { pos: 3, nome: "Pedro Lima", tipo: "Operador", cadastros: 56, conversoes: 34, taxa: 61 },
-  { pos: 4, nome: "Maria Souza", tipo: "Operador", cadastros: 43, conversoes: 25, taxa: 58 },
-  { pos: 5, nome: "Carlos Mendes", tipo: "Líder", cadastros: 38, conversoes: 20, taxa: 53 },
+  { id: "2", pos: 1, nome: "João Líder", tipo: "Líder", cadastros: 142, conversoes: 98, taxa: 69 },
+  { id: "3", pos: 2, nome: "Ana Líder", tipo: "Líder", cadastros: 89, conversoes: 61, taxa: 68 },
 ];
 
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
