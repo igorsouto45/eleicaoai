@@ -157,7 +157,20 @@ const ScannerFicha = () => {
   const downloadTemplate = () => {
     // Simular download do modelo oficial
     toast.info("Baixando modelo oficial de ficha...");
-    window.open("https://placehold.co/600x800/262626/white?text=MODELO+OFICIAL+COMANDO+ELEITORAL\n\nNOME:____________________\n\nCONTATO:_________________\n\nBAIRRO:__________________", "_blank");
+    const content = `
+MODELO OFICIAL COMANDO ELEITORAL
+
+NOME COMPLETO: _________________________________________________
+CPF: __________________________  NASCIMENTO: ___/___/_______
+NOME DA MÃE: __________________________________________________
+TÍTULO: _______________________  SEÇÃO: ________  ZONA: ________
+BIOMETRIA: ( ) SIM  ( ) NÃO
+MUNICÍPIO: ____________________  UF: ____
+ENDEREÇO: ______________________________________________________
+BAIRRO: _______________________  WHATSAPP: _____________________
+    `;
+    console.log(content);
+    window.open("https://placehold.co/600x800/262626/white?text=MODELO+OFICIAL+FICHA+COMPLETA", "_blank");
   };
 
   return (
