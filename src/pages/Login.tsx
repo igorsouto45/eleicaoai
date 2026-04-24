@@ -5,11 +5,14 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,9 +20,19 @@ const Login = () => {
       toast.error("Preencha todos os campos");
       return;
     }
-    // Mock login - will be replaced with Supabase auth
-    toast.success("Login realizado com sucesso!");
-    navigate("/");
+
+    // Mock login logic based on email
+    if (email === "admin@comando.ai") {
+      setUser({ id: "1", nome: "Administrador", email, tipo: "admin" });
+      toast.success("Bem-vindo, Administrador!");
+      navigate("/");
+    } else if (email === "lider@comando.ai") {
+      setUser({ id: "2", nome: "João Líder", email, tipo: "lider" });
+      toast.success("Bem-vindo, Líder!");
+      navigate("/eleitores");
+    } else {
+      toast.error("Credenciais inválidas para demonstração");
+    }
   };
 
   return (

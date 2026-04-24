@@ -57,11 +57,16 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   rejeicao: { label: "Rejeição", className: "bg-[hsl(var(--destructive)/0.15)] text-[hsl(var(--destructive))] border-[hsl(var(--destructive)/0.3)]" },
 };
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 const Eleitores = () => {
+  const { user } = useAuthStore();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"manual" | "scan">("manual");
+
+  const isAdmin = user?.tipo === "admin";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,10 +85,12 @@ const Eleitores = () => {
     form.reset();
   }
 
+  // Se for líder, filtra apenas os seus (mock logic)
   const filtered = mockEleitores.filter((e) => {
     const matchSearch = e.nome.toLowerCase().includes(search.toLowerCase()) || e.bairro.toLowerCase().includes(search.toLowerCase());
     const matchFilter = !filterStatus || e.status === filterStatus;
-    return matchSearch && matchFilter;
+    const matchOwner = isAdmin || e.origem.includes(user?.nome || "");
+    return matchSearch && matchFilter && matchOwner;
   });
 
   return (
@@ -91,20 +98,22 @@ const Eleitores = () => {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Eleitores</h1>
-            <p className="text-sm text-muted-foreground">{mockEleitores.length} eleitores cadastrados</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {isAdmin ? "Eleitores" : "Meus Liderados"}
+            </h1>
+            <p className="text-sm text-muted-foreground">{filtered.length} pessoas encontradas</p>
           </div>
           
           <div className="flex gap-2">
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground shadow-primary">
-                  <Plus className="mr-2 h-4 w-4" /> Novo Eleitor
+                  <Plus className="mr-2 h-4 w-4" /> Novo Liderado
                 </Button>
               </DialogTrigger>
               <DialogContent className="glass-card border-border sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Eleitor</DialogTitle>
+                  <DialogTitle>Cadastrar Novo Liderado</DialogTitle>
                   <DialogDescription>
                     Escolha o método de cadastro para a nova base.
                   </DialogDescription>
@@ -193,7 +202,7 @@ const Eleitores = () => {
                       />
                       <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-                        <Button type="submit" className="gradient-primary">Salvar Eleitor</Button>
+                        <Button type="submit" className="gradient-primary">Salvar Liderado</Button>
                       </div>
                     </form>
                   </Form>

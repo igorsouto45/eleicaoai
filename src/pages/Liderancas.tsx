@@ -36,7 +36,7 @@ const Liderancas = () => (
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-lg font-bold text-foreground">{r.cadastros}</p>
-                <p className="text-[10px] text-muted-foreground">Cadastros</p>
+                <p className="text-[10px] text-muted-foreground">Liderados</p>
               </div>
               <div>
                 <p className="text-lg font-bold status-apoiador">{r.conversoes}</p>
@@ -59,7 +59,7 @@ const Liderancas = () => (
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">#</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cadastros</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Liderados</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Conversões</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Taxa</th>
             </tr>

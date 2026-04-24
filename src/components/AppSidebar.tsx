@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -12,21 +12,33 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-
-const navItems = [
-  { label: "Painel de Guerra", icon: LayoutDashboard, path: "/" },
-  { label: "Eleitores", icon: Users, path: "/eleitores" },
-  { label: "Captura", icon: UserPlus, path: "/captura" },
-  { label: "Reconquista", icon: Target, path: "/reconquista" },
-  { label: "Mapa Estratégico", icon: Map, path: "/mapa" },
-  { label: "Lideranças", icon: Trophy, path: "/liderancas" },
-  { label: "Prioridades", icon: AlertTriangle, path: "/prioridades" },
-  { label: "Alertas", icon: Bell, path: "/alertas" },
-  { label: "IA WhatsApp", icon: Brain, path: "/ia-whatsapp" },
-];
+import { useAuthStore } from "@/store/useAuthStore";
 
 const AppSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const isAdmin = user?.tipo === "admin";
+
+  const navItems = [
+    { label: "Painel de Guerra", icon: LayoutDashboard, path: "/", adminOnly: true },
+    { label: "Eleitores", icon: Users, path: "/eleitores", adminOnly: false },
+    { label: "Captura", icon: UserPlus, path: "/captura", adminOnly: false },
+    { label: "Reconquista", icon: Target, path: "/reconquista", adminOnly: true },
+    { label: "Mapa Estratégico", icon: Map, path: "/mapa", adminOnly: true },
+    { label: "Lideranças", icon: Trophy, path: "/liderancas", adminOnly: true },
+    { label: "Prioridades", icon: AlertTriangle, path: "/prioridades", adminOnly: true },
+    { label: "Alertas", icon: Bell, path: "/alertas", adminOnly: true },
+    { label: "IA WhatsApp", icon: Brain, path: "/ia-whatsapp", adminOnly: true },
+  ];
+
+  const filteredItems = navItems.filter(item => !item.adminOnly || isAdmin);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -43,7 +55,7 @@ const AppSidebar = () => {
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {navItems.map((item) => {
+        {filteredItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
@@ -64,6 +76,11 @@ const AppSidebar = () => {
 
       {/* Footer */}
       <div className="border-t border-border p-3 space-y-1">
+        <div className="px-3 py-2 mb-2">
+          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Usuário</p>
+          <p className="text-xs font-medium text-foreground truncate">{user?.nome || 'Convidado'}</p>
+          <p className="text-[9px] text-primary font-bold uppercase">{user?.tipo === 'admin' ? 'Administrador' : 'Líder'}</p>
+        </div>
         <Link
           to="/configuracoes"
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-foreground transition-all"
@@ -71,13 +88,13 @@ const AppSidebar = () => {
           <Settings className="h-4 w-4" />
           Configurações
         </Link>
-        <Link
-          to="/login"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-foreground transition-all"
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-muted hover:text-destructive transition-all"
         >
           <LogOut className="h-4 w-4" />
           Sair
-        </Link>
+        </button>
       </div>
     </aside>
   );
