@@ -156,10 +156,19 @@ const Eleitores = () => {
   };
 
   const filtered = liderados.filter((e) => {
-    const matchSearch = e.nome.toLowerCase().includes(search.toLowerCase()) || e.bairro.toLowerCase().includes(search.toLowerCase());
+    const searchLower = search.toLowerCase();
+    const matchSearch = 
+      e.nome.toLowerCase().includes(searchLower) || 
+      e.bairro.toLowerCase().includes(searchLower) ||
+      (e.cpf && e.cpf.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""))) ||
+      e.telefone.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""));
+
     const matchFilter = !filterStatus || e.status === filterStatus;
+    const matchBiometria = filterBiometria === "todos" ? true : (filterBiometria === "sim" ? e.temBiometria : !e.temBiometria);
+    const matchBairro = filterBairroManual === "todos" ? true : e.bairro === filterBairroManual;
     const matchOwner = isAdmin || e.origemId === user?.id;
-    return matchSearch && matchFilter && matchOwner;
+    
+    return matchSearch && matchFilter && matchBiometria && matchBairro && matchOwner;
   });
 
   const canEdit = useCallback((liderado: any) => {
