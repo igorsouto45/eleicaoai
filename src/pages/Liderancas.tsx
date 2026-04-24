@@ -23,7 +23,33 @@ const ranking = [];
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
 
 const Liderancas = () => {
-  const { registrosCombustivel, registrarCombustivel } = useLideradosStore();
+  const { liderados, registrosCombustivel, registrarCombustivel } = useLideradosStore();
+  
+  const ranking = useMemo(() => {
+    const lideresMap: Record<string, any> = {};
+    
+    liderados.forEach(l => {
+      if (!lideresMap[l.origemId]) {
+        lideresMap[l.origemId] = {
+          id: l.origemId,
+          nome: l.origemNome,
+          tipo: l.origemId === "1" ? "Coordenador" : "Líder",
+          cadastros: 0,
+          conversoes: 0
+        };
+      }
+      lideresMap[l.origemId].cadastros++;
+      if (l.status === 'apoiador') lideresMap[l.origemId].conversoes++;
+    });
+
+    return Object.values(lideresMap)
+      .map(l => ({
+        ...l,
+        taxa: l.cadastros > 0 ? Math.round((l.conversoes / l.cadastros) * 100) : 0
+      }))
+      .sort((a, b) => b.cadastros - a.cadastros)
+      .map((l, index) => ({ ...l, pos: index + 1 }));
+  }, [liderados]);
   const [selectedLider, setSelectedLider] = useState<any>(null);
   const [fuelValue, setFuelValue] = useState("");
   const [kmValue, setKmValue] = useState("");
