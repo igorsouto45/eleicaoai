@@ -1,4 +1,4 @@
-import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History, Search, Calendar, Filter, Clock } from "lucide-react";
+import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History, Search, Calendar, Filter, Clock as ClockIcon } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { Button } from "@/components/ui/button";
