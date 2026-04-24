@@ -7,6 +7,7 @@ import Tesseract from "tesseract.js";
 import { Badge } from "@/components/ui/badge";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { gerarFichaPDF } from "@/utils/pdfGenerator";
 
 interface ScanResult {
   id: string;
