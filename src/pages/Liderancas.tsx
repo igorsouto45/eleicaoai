@@ -36,7 +36,7 @@ const Liderancas = () => (
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-lg font-bold text-foreground">{r.cadastros}</p>
-                <p className="text-[10px] text-muted-foreground">Cadastros</p>
+                <p className="text-[10px] text-muted-foreground">Liderados</p>
               </div>
               <div>
                 <p className="text-lg font-bold status-apoiador">{r.conversoes}</p>
