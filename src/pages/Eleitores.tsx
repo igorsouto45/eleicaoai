@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText, ArrowLeftRight, MoreHorizontal, User } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText, ArrowLeftRight, MoreHorizontal, User, Fingerprint, MapPin, Printer } from "lucide-react";
+import { gerarFichaPDF } from "@/utils/pdfGenerator";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -79,12 +80,21 @@ const Eleitores = () => {
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [isCrmOpen, setIsCrmOpen] = useState(false);
   const [selectedLiderado, setSelectedLiderado] = useState<any>(null);
   const [novoLiderId, setNovoLiderId] = useState("");
   const [activeTab, setActiveTab] = useState<"manual" | "scan">("manual");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Novos filtros
+  const [filterBiometria, setFilterBiometria] = useState<string>("todos");
+  const [filterBairroManual, setFilterBairroManual] = useState<string>("todos");
 
   const isAdmin = user?.tipo === "admin";
+  
+  const bairrosDisponiveis = useMemo(() => {
+    return Array.from(new Set(liderados.map(l => l.bairro))).sort();
+  }, [liderados]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -146,10 +156,19 @@ const Eleitores = () => {
   };
 
   const filtered = liderados.filter((e) => {
-    const matchSearch = e.nome.toLowerCase().includes(search.toLowerCase()) || e.bairro.toLowerCase().includes(search.toLowerCase());
+    const searchLower = search.toLowerCase();
+    const matchSearch = 
+      e.nome.toLowerCase().includes(searchLower) || 
+      e.bairro.toLowerCase().includes(searchLower) ||
+      (e.cpf && e.cpf.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""))) ||
+      e.telefone.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""));
+
     const matchFilter = !filterStatus || e.status === filterStatus;
+    const matchBiometria = filterBiometria === "todos" ? true : (filterBiometria === "sim" ? e.temBiometria : !e.temBiometria);
+    const matchBairro = filterBairroManual === "todos" ? true : e.bairro === filterBairroManual;
     const matchOwner = isAdmin || e.origemId === user?.id;
-    return matchSearch && matchFilter && matchOwner;
+    
+    return matchSearch && matchFilter && matchBiometria && matchBairro && matchOwner;
   });
 
   const canEdit = useCallback((liderado: any) => {
@@ -363,16 +382,46 @@ const Eleitores = () => {
 
         {/* List filters */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar por nome ou bairro..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-card border-border" />
+            <Input placeholder="Buscar por nome, bairro, CPF ou WhatsApp..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-card border-border h-10 shadow-sm" />
           </div>
-          <div className="flex gap-2">
+          
+          <div className="flex gap-2 bg-muted/30 p-1 rounded-lg border border-border">
             {[null, "apoiador", "indeciso", "rejeicao"].map((s) => (
-              <button key={s ?? "all"} onClick={() => setFilterStatus(s)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filterStatus === s ? "gradient-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
+              <button key={s ?? "all"} onClick={() => setFilterStatus(s)} className={`rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${filterStatus === s ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 {s ? statusConfig[s].label : "Todos"}
               </button>
             ))}
+          </div>
+
+          <div className="flex gap-2">
+            <div className="relative">
+              <Fingerprint className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBiometria} 
+                onChange={(e) => setFilterBiometria(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none min-w-[120px]"
+              >
+                <option value="todos">Biometria: Todas</option>
+                <option value="sim">Com Biometria</option>
+                <option value="nao">Sem Biometria</option>
+              </select>
+            </div>
+
+            <div className="relative">
+              <MapPin className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBairroManual} 
+                onChange={(e) => setFilterBairroManual(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none min-w-[120px]"
+              >
+                <option value="todos">Todos Bairros</option>
+                {bairrosDisponiveis.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -404,8 +453,11 @@ const Eleitores = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="glass-card border-border shadow-2xl">
                       <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
-                      <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
+                      <DropdownMenuItem className="text-xs cursor-pointer" onClick={() => { setSelectedLiderado(e); setIsCrmOpen(true); }}>
                         <Eye className="mr-2 h-3 w-3" /> Ver Perfil Completo
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-xs cursor-pointer" onClick={() => gerarFichaPDF(e)}>
+                        <Printer className="mr-2 h-3 w-3" /> Imprimir Ficha
                       </DropdownMenuItem>
                       {isAdmin && (
                         <>
@@ -507,6 +559,79 @@ const Eleitores = () => {
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsTransferOpen(false)}>Cancelar</Button>
             <Button className="gradient-primary" onClick={handleTransfer} disabled={!novoLiderId}>Confirmar Transferência</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* CRM Profile Dialog */}
+      <Dialog open={isCrmOpen} onOpenChange={setIsCrmOpen}>
+        <DialogContent className="glass-card border-border sm:max-w-[600px] max-h-[90vh] overflow-y-auto shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Perfil do Liderado: {selectedLiderado?.nome}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold">Informação Básica</p>
+                <p className="text-sm"><strong>CPF:</strong> {selectedLiderado?.cpf}</p>
+                <p className="text-sm"><strong>Nascimento:</strong> {selectedLiderado?.dataNascimento}</p>
+                <p className="text-sm"><strong>Mãe:</strong> {selectedLiderado?.nomeMae}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
+                <p className="text-sm"><strong>Bairro:</strong> {selectedLiderado?.bairro}</p>
+                <p className="text-sm"><strong>Município:</strong> {selectedLiderado?.municipio} / {selectedLiderado?.uf}</p>
+                <p className="text-sm text-muted-foreground truncate" title={selectedLiderado?.endereco}>{selectedLiderado?.endereco}</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <p className="text-[10px] text-primary uppercase font-bold mb-2">Situação Eleitoral</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.tituloEleitoral || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Título</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.zona || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Zona</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.secao || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Seção</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] text-muted-foreground uppercase font-bold">Histórico e Interações</p>
+              <div className="space-y-2">
+                <div className="p-3 bg-muted/30 rounded-lg border border-border flex items-start gap-3">
+                  <div className="h-2 w-2 rounded-full bg-success mt-1.5" />
+                  <div>
+                    <p className="text-xs font-medium">Cadastro realizado via {selectedLiderado?.origemNome}</p>
+                    <p className="text-[10px] text-muted-foreground">Em {selectedLiderado?.data}</p>
+                  </div>
+                </div>
+                {selectedLiderado?.historicoReconquista?.map((h: string, i: number) => (
+                  <div key={i} className="p-3 bg-muted/30 rounded-lg border border-border flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-primary mt-1.5" />
+                    <p className="text-xs">{h}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => gerarFichaPDF(selectedLiderado)}>
+              <Printer className="h-4 w-4 mr-2" /> Imprimir Ficha
+            </Button>
+            <Button className="gradient-primary" onClick={() => setIsCrmOpen(false)}>Fechar Perfil</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
