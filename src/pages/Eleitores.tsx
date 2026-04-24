@@ -113,7 +113,7 @@ const Eleitores = () => {
               </DialogTrigger>
               <DialogContent className="glass-card border-border sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Eleitor</DialogTitle>
+                  <DialogTitle>Cadastrar Novo Liderado</DialogTitle>
                   <DialogDescription>
                     Escolha o método de cadastro para a nova base.
                   </DialogDescription>
