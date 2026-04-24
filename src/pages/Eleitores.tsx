@@ -80,12 +80,21 @@ const Eleitores = () => {
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [isCrmOpen, setIsCrmOpen] = useState(false);
   const [selectedLiderado, setSelectedLiderado] = useState<any>(null);
   const [novoLiderId, setNovoLiderId] = useState("");
   const [activeTab, setActiveTab] = useState<"manual" | "scan">("manual");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Novos filtros
+  const [filterBiometria, setFilterBiometria] = useState<string>("todos");
+  const [filterBairroManual, setFilterBairroManual] = useState<string>("todos");
 
   const isAdmin = user?.tipo === "admin";
+  
+  const bairrosDisponiveis = useMemo(() => {
+    return Array.from(new Set(liderados.map(l => l.bairro))).sort();
+  }, [liderados]);
 
   useEffect(() => {
     const handleOnline = () => {
