@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -12,21 +12,33 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-
-const navItems = [
-  { label: "Painel de Guerra", icon: LayoutDashboard, path: "/" },
-  { label: "Eleitores", icon: Users, path: "/eleitores" },
-  { label: "Captura", icon: UserPlus, path: "/captura" },
-  { label: "Reconquista", icon: Target, path: "/reconquista" },
-  { label: "Mapa Estratégico", icon: Map, path: "/mapa" },
-  { label: "Lideranças", icon: Trophy, path: "/liderancas" },
-  { label: "Prioridades", icon: AlertTriangle, path: "/prioridades" },
-  { label: "Alertas", icon: Bell, path: "/alertas" },
-  { label: "IA WhatsApp", icon: Brain, path: "/ia-whatsapp" },
-];
+import { useAuthStore } from "@/store/useAuthStore";
 
 const AppSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const isAdmin = user?.tipo === "admin";
+
+  const navItems = [
+    { label: "Painel de Guerra", icon: LayoutDashboard, path: "/", adminOnly: true },
+    { label: "Eleitores", icon: Users, path: "/eleitores", adminOnly: false },
+    { label: "Captura", icon: UserPlus, path: "/captura", adminOnly: false },
+    { label: "Reconquista", icon: Target, path: "/reconquista", adminOnly: true },
+    { label: "Mapa Estratégico", icon: Map, path: "/mapa", adminOnly: true },
+    { label: "Lideranças", icon: Trophy, path: "/liderancas", adminOnly: true },
+    { label: "Prioridades", icon: AlertTriangle, path: "/prioridades", adminOnly: true },
+    { label: "Alertas", icon: Bell, path: "/alertas", adminOnly: true },
+    { label: "IA WhatsApp", icon: Brain, path: "/ia-whatsapp", adminOnly: true },
+  ];
+
+  const filteredItems = navItems.filter(item => !item.adminOnly || isAdmin);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-border bg-sidebar">
