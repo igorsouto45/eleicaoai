@@ -1,9 +1,44 @@
 import { useState } from "react";
-import { Search, Filter, Download, Eye } from "lucide-react";
+import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogDescription
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import ScannerFicha from "@/components/ScannerFicha";
+
+const formSchema = z.object({
+  nome: z.string().min(2, "Nome é obrigatório"),
+  telefone: z.string().min(10, "Telefone inválido"),
+  bairro: z.string().min(2, "Bairro é obrigatório"),
+  status: z.string(),
+});
 
 const mockEleitores = [
   { id: 1, nome: "Maria Silva", telefone: "(11) 99999-1234", bairro: "Centro", status: "apoiador", origem: "João (Líder)", data: "2024-03-15" },
@@ -25,6 +60,25 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 const Eleitores = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"manual" | "scan">("manual");
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      bairro: "",
+      status: "indeciso",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    toast.success("Eleitor cadastrado com sucesso!");
+    setIsModalOpen(false);
+    form.reset();
+  }
 
   const filtered = mockEleitores.filter((e) => {
     const matchSearch = e.nome.toLowerCase().includes(search.toLowerCase()) || e.bairro.toLowerCase().includes(search.toLowerCase());
@@ -35,14 +89,124 @@ const Eleitores = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Eleitores</h1>
             <p className="text-sm text-muted-foreground">{mockEleitores.length} eleitores cadastrados</p>
           </div>
-          <Button className="gradient-primary text-primary-foreground shadow-primary">
-            <Download className="mr-2 h-4 w-4" /> Exportar
-          </Button>
+          
+          <div className="flex gap-2">
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="gradient-primary text-primary-foreground shadow-primary">
+                  <Plus className="mr-2 h-4 w-4" /> Novo Eleitor
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass-card border-border sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Cadastrar Novo Eleitor</DialogTitle>
+                  <DialogDescription>
+                    Escolha o método de cadastro para a nova base.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="flex gap-2 p-1 bg-muted/50 rounded-lg mb-4">
+                  <button 
+                    onClick={() => setActiveTab("manual")}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition-all ${activeTab === 'manual' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    <UserPlus className="h-3.5 w-3.5" /> Manual
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab("scan")}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition-all ${activeTab === 'scan' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Escanear Ficha
+                  </button>
+                </div>
+
+                {activeTab === "manual" ? (
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="nome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Nome Completo</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: Maria Silva" {...field} className="bg-muted/30 border-border" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="telefone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">WhatsApp / Celular</FormLabel>
+                              <FormControl>
+                                <Input placeholder="(00) 00000-0000" {...field} className="bg-muted/30 border-border" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="bairro"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Bairro</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: Centro" {...field} className="bg-muted/30 border-border" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs">Classificação Inicial</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="bg-muted/30 border-border">
+                                  <SelectValue placeholder="Selecione o status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="bg-card border-border">
+                                <SelectItem value="apoiador">Apoiador</SelectItem>
+                                <SelectItem value="indeciso">Indeciso</SelectItem>
+                                <SelectItem value="rejeicao">Rejeição</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+                        <Button type="submit" className="gradient-primary">Salvar Eleitor</Button>
+                      </div>
+                    </form>
+                  </Form>
+                ) : (
+                  <ScannerFicha />
+                )}
+              </DialogContent>
+            </Dialog>
+            
+            <Button variant="outline" className="border-border hover:bg-muted">
+              <Download className="mr-2 h-4 w-4" /> Exportar
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
