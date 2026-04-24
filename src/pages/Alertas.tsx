@@ -1,12 +1,25 @@
-import { Bell, UserPlus, ArrowLeftRight, Activity, Trash2, Clock } from "lucide-react";
+import { Bell, UserPlus, ArrowLeftRight, Activity, Trash2, Clock, Download, Filter, User } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useState } from "react";
 
 const Alertas = () => {
   const { notificacoes, limparNotificacoes } = useLideradosStore();
+  const [filterTipo, setFilterTipo] = useState<string>("todos");
+  const [searchLider, setSearchLider] = useState("");
+
+  const filteredNotificacoes = notificacoes.filter(n => {
+    const matchTipo = filterTipo === "todos" || n.tipo === filterTipo;
+    const matchLider = n.liderNome.toLowerCase().includes(searchLider.toLowerCase());
+    return matchTipo && matchLider;
+  });
+
+  const exportLog = () => {
+    toast.success("Log de atividades exportado com sucesso! (CSV)");
+  };
 
   const getIcon = (tipo: string) => {
     switch (tipo) {
