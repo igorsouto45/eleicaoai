@@ -117,72 +117,194 @@ const CadastroPublico = () => {
             <p className="mt-1 text-sm text-muted-foreground">Participe e faça sua voz ser ouvida</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Nome Completo</label>
-              <Input
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                placeholder="Seu nome"
-                className="bg-secondary border-border"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
+            {/* Seção: Identificação */}
+            <div className="space-y-4">
+              <p className="text-[10px] uppercase font-bold text-primary tracking-widest flex items-center gap-2">
+                <User className="h-3 w-3" /> Identificação Pessoal
+              </p>
+              
+              <div>
+                <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Nome Completo *</label>
+                <Input
+                  value={form.nome}
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  placeholder="Seu nome completo"
+                  className="bg-secondary/50 border-border focus:ring-primary/50"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Telefone</label>
-              <Input
-                value={form.telefone}
-                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                placeholder="(00) 00000-0000"
-                className="bg-secondary border-border"
-              />
-            </div>
-
-            <div className="relative">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Bairro</label>
-              <Input
-                value={form.bairro}
-                onChange={(e) => handleBairroChange(e.target.value)}
-                placeholder="Digite seu bairro"
-                className="bg-secondary border-border"
-              />
-              {bairroSuggestions.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg">
-                  {bairroSuggestions.map((b) => (
-                    <button
-                      key={b}
-                      type="button"
-                      onClick={() => { setForm({ ...form, bairro: b }); setBairroSuggestions([]); }}
-                      className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg"
-                    >
-                      {b}
-                    </button>
-                  ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">CPF *</label>
+                  <Input
+                    value={form.cpf}
+                    onChange={(e) => setForm({ ...form, cpf: e.target.value })}
+                    placeholder="000.000.000-00"
+                    className="bg-secondary/50 border-border"
+                    required
+                  />
                 </div>
-              )}
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Data de Nascimento *</label>
+                  <Input
+                    type="date"
+                    value={form.dataNascimento}
+                    onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })}
+                    className="bg-secondary/50 border-border"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Nome da Mãe *</label>
+                <Input
+                  value={form.nomeMae}
+                  onChange={(e) => setForm({ ...form, nomeMae: e.target.value })}
+                  placeholder="Nome completo da sua mãe"
+                  className="bg-secondary/50 border-border"
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                Você pretende votar no candidato?
+            {/* Seção: Eleitoral */}
+            <div className="space-y-4 pt-2 border-t border-border/50">
+              <p className="text-[10px] uppercase font-bold text-primary tracking-widest flex items-center gap-2">
+                <FileText className="h-3 w-3" /> Informações Eleitorais
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Título de Eleitor</label>
+                  <Input
+                    value={form.tituloEleitoral}
+                    onChange={(e) => setForm({ ...form, tituloEleitoral: e.target.value })}
+                    placeholder="Nº do Título"
+                    className="bg-secondary/50 border-border"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Zona</label>
+                  <Input
+                    value={form.zona}
+                    onChange={(e) => setForm({ ...form, zona: e.target.value })}
+                    placeholder="000"
+                    className="bg-secondary/50 border-border"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Seção</label>
+                  <Input
+                    value={form.secao}
+                    onChange={(e) => setForm({ ...form, secao: e.target.value })}
+                    placeholder="000"
+                    className="bg-secondary/50 border-border"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold text-muted-foreground uppercase">Tem Biometria Cadastrada?</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, temBiometria: true })}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${form.temBiometria ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-secondary/50 border-border text-muted-foreground hover:bg-muted'}`}
+                  >
+                    Sim
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, temBiometria: false })}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-all ${!form.temBiometria ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-secondary/50 border-border text-muted-foreground hover:bg-muted'}`}
+                  >
+                    Não
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Seção: Localização */}
+            <div className="space-y-4 pt-2 border-t border-border/50">
+              <p className="text-[10px] uppercase font-bold text-primary tracking-widest flex items-center gap-2">
+                <MapPin className="h-3 w-3" /> Endereço e Contato
+              </p>
+              
+              <div>
+                <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Endereço Completo *</label>
+                <Input
+                  value={form.endereco}
+                  onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+                  placeholder="Rua, número, complemento"
+                  className="bg-secondary/50 border-border"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">Bairro *</label>
+                  <Input
+                    value={form.bairro}
+                    onChange={(e) => handleBairroChange(e.target.value)}
+                    placeholder="Ex: Centro"
+                    className="bg-secondary/50 border-border"
+                    required
+                  />
+                  {bairroSuggestions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg max-h-40 overflow-y-auto">
+                      {bairroSuggestions.map((b) => (
+                        <button
+                          key={b}
+                          type="button"
+                          onClick={() => { setForm({ ...form, bairro: b }); setBairroSuggestions([]); }}
+                          className="w-full px-4 py-2 text-left text-xs text-foreground hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg border-b border-border/50 last:border-0"
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground uppercase">WhatsApp *</label>
+                  <Input
+                    value={form.telefone}
+                    onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                    placeholder="(00) 00000-0000"
+                    className="bg-secondary/50 border-border"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Intenção de Voto */}
+            <div className="pt-2 border-t border-border/50">
+              <label className="mb-3 block text-[11px] font-bold text-primary uppercase text-center tracking-widest">
+                Pesquisa de Intenção de Voto
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {[
-                  { value: "sim", label: "✅ Sim", activeClass: "border-[hsl(var(--success))] bg-[hsl(var(--success)/0.1)]" },
-                  { value: "nao", label: "❌ Não", activeClass: "border-[hsl(var(--destructive))] bg-[hsl(var(--destructive)/0.1)]" },
-                  { value: "indeciso", label: "🤔 Não sei", activeClass: "border-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.1)]" },
+                  { value: "sim", label: "✅ Sim, pretendo votar", activeClass: "border-[hsl(var(--success))] bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))]" },
+                  { value: "nao", label: "❌ Não pretendo votar", activeClass: "border-[hsl(var(--destructive))] bg-[hsl(var(--destructive)/0.15)] text-[hsl(var(--destructive))]" },
+                  { value: "indeciso", label: "🤔 Ainda estou avaliando", activeClass: "border-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.15)] text-[hsl(var(--warning))]" },
                 ].map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setForm({ ...form, intencao: opt.value })}
-                    className={`rounded-lg border p-3 text-center text-sm font-medium transition-all ${
+                    className={`rounded-xl border p-3 text-left text-xs font-bold transition-all flex items-center justify-between ${
                       form.intencao === opt.value
                         ? opt.activeClass
-                        : "border-border bg-secondary text-muted-foreground hover:border-border/80"
+                        : "border-border bg-secondary/50 text-muted-foreground hover:border-primary/30"
                     }`}
                   >
                     {opt.label}
+                    {form.intencao === opt.value && <CheckCircle className="h-4 w-4" />}
                   </button>
                 ))}
               </div>
@@ -191,11 +313,15 @@ const CadastroPublico = () => {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full gradient-primary text-primary-foreground shadow-primary mt-2"
+              className="w-full h-12 text-sm font-bold gradient-primary text-primary-foreground shadow-xl shadow-primary/20 mt-4 rounded-xl"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {loading ? "Processando..." : "Enviar Cadastro"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
+              {loading ? "PROCESSANDO..." : "CONCLUIR MEU CADASTRO"}
             </Button>
+            
+            <p className="text-[10px] text-center text-muted-foreground italic px-4">
+              Ao clicar em concluir, você concorda em compartilhar seus dados para fins de mobilização da campanha.
+            </p>
           </form>
         </div>
       </div>
