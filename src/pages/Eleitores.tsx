@@ -382,16 +382,46 @@ const Eleitores = () => {
 
         {/* List filters */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar por nome ou bairro..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-card border-border" />
+            <Input placeholder="Buscar por nome, bairro, CPF ou WhatsApp..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-card border-border h-10 shadow-sm" />
           </div>
-          <div className="flex gap-2">
+          
+          <div className="flex gap-2 bg-muted/30 p-1 rounded-lg border border-border">
             {[null, "apoiador", "indeciso", "rejeicao"].map((s) => (
-              <button key={s ?? "all"} onClick={() => setFilterStatus(s)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filterStatus === s ? "gradient-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
+              <button key={s ?? "all"} onClick={() => setFilterStatus(s)} className={`rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${filterStatus === s ? "gradient-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 {s ? statusConfig[s].label : "Todos"}
               </button>
             ))}
+          </div>
+
+          <div className="flex gap-2">
+            <div className="relative">
+              <Fingerprint className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBiometria} 
+                onChange={(e) => setFilterBiometria(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none min-w-[120px]"
+              >
+                <option value="todos">Biometria: Todas</option>
+                <option value="sim">Com Biometria</option>
+                <option value="nao">Sem Biometria</option>
+              </select>
+            </div>
+
+            <div className="relative">
+              <MapPin className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterBairroManual} 
+                onChange={(e) => setFilterBairroManual(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none min-w-[120px]"
+              >
+                <option value="todos">Todos Bairros</option>
+                {bairrosDisponiveis.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
