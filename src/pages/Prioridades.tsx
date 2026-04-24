@@ -7,12 +7,7 @@ const tabs = [
   { label: "Alta Conversão", icon: TrendingUp },
 ];
 
-const prioridades = [
-  { nome: "Ana Costa", bairro: "São José", motivo: "Indecisa há 2 dias, sem contato", chance: 82 },
-  { nome: "Carlos Santos", bairro: "Jardim América", motivo: "Indeciso, 1 tentativa sem resposta", chance: 71 },
-  { nome: "Marcos Souza", bairro: "Vila Nova", motivo: "Indeciso, cadastrado hoje", chance: 65 },
-  { nome: "Lucia Ferreira", bairro: "Jardim América", motivo: "Apoiadora anterior, mudou para indecisa", chance: 58 },
-];
+const prioridades = [];
 
 const Prioridades = () => (
   <AppLayout>

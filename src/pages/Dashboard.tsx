@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { Users, UserCheck, HelpCircle, UserX, TrendingUp } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 import AppLayout from "@/components/AppLayout";
@@ -6,28 +7,12 @@ import AiInsightCard from "@/components/AiInsightCard";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLideradosStore } from "@/store/useLideradosStore";
 
-const dailyData = [
-  { dia: "Seg", cadastros: 45, conversoes: 12 },
-  { dia: "Ter", cadastros: 62, conversoes: 18 },
-  { dia: "Qua", cadastros: 78, conversoes: 24 },
-  { dia: "Qui", cadastros: 91, conversoes: 31 },
-  { dia: "Sex", cadastros: 120, conversoes: 42 },
-  { dia: "Sáb", cadastros: 85, conversoes: 29 },
-  { dia: "Dom", cadastros: 53, conversoes: 15 },
-];
-
-const bairroData = [
-  { bairro: "Centro", total: 340 },
-  { bairro: "Jardim", total: 280 },
-  { bairro: "Vila Nova", total: 210 },
-  { bairro: "Boa Vista", total: 175 },
-  { bairro: "São José", total: 140 },
-];
-
+const dailyData = [];
+const bairroData = [];
 const statusData = [
-  { name: "Apoiadores", value: 8420, color: "hsl(142, 71%, 45%)" },
-  { name: "Indecisos", value: 3150, color: "hsl(45, 93%, 47%)" },
-  { name: "Rejeição", value: 1183, color: "hsl(0, 72%, 51%)" },
+  { name: "Apoiadores", value: 0, color: "hsl(142, 71%, 45%)" },
+  { name: "Indecisos", value: 0, color: "hsl(45, 93%, 47%)" },
+  { name: "Rejeição", value: 0, color: "hsl(0, 72%, 51%)" },
 ];
 
 const Dashboard = () => {
@@ -37,12 +22,55 @@ const Dashboard = () => {
 
   const myLiderados = isAdmin ? liderados : liderados.filter(l => l.origemId === user?.id);
   
-  const stats = {
-    total: myLiderados.length,
-    apoiadores: myLiderados.filter(l => l.status === 'apoiador').length,
-    indecisos: myLiderados.filter(l => l.status === 'indeciso').length,
-    rejeicao: myLiderados.filter(l => l.status === 'rejeicao').length,
-  };
+  const stats = useMemo(() => {
+    return {
+      total: myLiderados.length,
+      apoiadores: myLiderados.filter(l => l.status === 'apoiador').length,
+      indecisos: myLiderados.filter(l => l.status === 'indeciso').length,
+      rejeicao: myLiderados.filter(l => l.status === 'rejeicao').length,
+    };
+  }, [myLiderados]);
+
+  const dynamicStatusData = useMemo(() => [
+    { name: "Apoiadores", value: stats.apoiadores, color: "hsl(142, 71%, 45%)" },
+    { name: "Indecisos", value: stats.indecisos, color: "hsl(45, 93%, 47%)" },
+    { name: "Rejeição", value: stats.rejeicao, color: "hsl(0, 72%, 51%)" },
+  ], [stats]);
+
+  const dynamicBairroData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    myLiderados.forEach(l => {
+      counts[l.bairro] = (counts[l.bairro] || 0) + 1;
+    });
+    return Object.entries(counts).map(([bairro, total]) => ({ bairro, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+  }, [myLiderados]);
+
+  const dynamicDailyData = useMemo(() => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split('T')[0];
+    });
+
+    const counts: Record<string, { cadastros: number; conversoes: number }> = {};
+    last7Days.forEach(day => counts[day] = { cadastros: 0, conversoes: 0 });
+
+    myLiderados.forEach(l => {
+      if (counts[l.data]) {
+        counts[l.data].cadastros++;
+        if (l.status === 'apoiador') counts[l.data].conversoes++;
+      }
+    });
+
+    const diaMap: Record<number, string> = { 0: "Dom", 1: "Seg", 2: "Ter", 3: "Qua", 4: "Qui", 5: "Sex", 6: "Sáb" };
+
+    return Object.entries(counts).map(([date, data]) => ({
+      dia: diaMap[new Date(date + 'T12:00:00').getDay()],
+      ...data
+    }));
+  }, [myLiderados]);
 
   return (
     <AppLayout>
@@ -69,7 +97,7 @@ const Dashboard = () => {
           <div className="glass-card col-span-2 rounded-xl p-5">
             <h3 className="mb-4 text-sm font-semibold text-foreground">Evolução Diária</h3>
             <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={dailyData}>
+              <AreaChart data={dynamicDailyData}>
                 <defs>
                   <linearGradient id="gradCadastros" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(262, 71%, 50%)" stopOpacity={0.3} />
@@ -95,8 +123,8 @@ const Dashboard = () => {
             <h3 className="mb-4 text-sm font-semibold text-foreground">Distribuição por Status</h3>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
-                  {statusData.map((entry, index) => (
+                <Pie data={dynamicStatusData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
+                  {dynamicStatusData.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
                 </Pie>
@@ -104,7 +132,7 @@ const Dashboard = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="mt-2 space-y-2">
-              {statusData.map((s) => (
+              {dynamicStatusData.map((s) => (
                 <div key={s.name} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
@@ -123,7 +151,7 @@ const Dashboard = () => {
           <div className="glass-card rounded-xl p-5">
             <h3 className="mb-4 text-sm font-semibold text-foreground">Eleitores por Bairro</h3>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={bairroData}>
+              <BarChart data={dynamicBairroData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(240, 6%, 18%)" />
                 <XAxis dataKey="bairro" tick={{ fill: "hsl(240, 5%, 55%)", fontSize: 11 }} />
                 <YAxis tick={{ fill: "hsl(240, 5%, 55%)", fontSize: 12 }} />
