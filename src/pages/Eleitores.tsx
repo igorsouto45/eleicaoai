@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Filter, Download, Eye, Plus, UserPlus, QrCode, FileText, ArrowLeftRight, MoreHorizontal, User } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
@@ -132,6 +132,10 @@ const Eleitores = () => {
     return matchSearch && matchFilter && matchOwner;
   });
 
+  const canEdit = useCallback((liderado: any) => {
+    return isAdmin || liderado.origemId === user?.id;
+  }, [isAdmin, user?.id]);
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -151,6 +155,14 @@ const Eleitores = () => {
           </div>
           
           <div className="flex gap-2">
+            {!isAdmin && (
+              <Button variant="outline" className="border-border hover:bg-muted" onClick={() => {
+                toast.success("Gerando PDF com sua lista de liderados e QR Codes...");
+                // Simulação de geração de PDF
+              }}>
+                <Download className="mr-2 h-4 w-4" /> Baixar Minha Lista (PDF)
+              </Button>
+            )}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground shadow-primary">
@@ -285,7 +297,9 @@ const Eleitores = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="glass-card border-border">
                         <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
-                        <DropdownMenuItem className="text-xs cursor-pointer"><Eye className="mr-2 h-3 w-3" /> Ver Perfil</DropdownMenuItem>
+                        <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
+                          <Eye className="mr-2 h-3 w-3" /> Ver Perfil
+                        </DropdownMenuItem>
                         {isAdmin && (
                           <>
                             <DropdownMenuSeparator className="bg-border" />
