@@ -15,7 +15,7 @@ const Captura = () => {
   const isAdmin = user?.tipo === "admin";
   
   // Se for líder, ele só vê o seu próprio link
-  const initialLink = isAdmin ? mockLinks[1].codigo : (user?.id === "2" ? "joao-lider" : "ana-lider");
+  const initialLink = isAdmin ? mockLinks[0].codigo : (user?.id === "2" ? "joao-lider" : "ana-lider");
   const [selectedLink, setSelectedLink] = useState(initialLink);
   const baseUrl = window.location.origin;
 
