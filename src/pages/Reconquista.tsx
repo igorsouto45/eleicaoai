@@ -1,29 +1,48 @@
-import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History } from "lucide-react";
+import { Target, TrendingUp, MessageSquare, Phone, AlertCircle, CheckCircle2, History, Search, Calendar, Filter, Clock } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
   DialogTrigger,
-  DialogDescription 
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 
 const Reconquista = () => {
-  const { liderados, updateStatus } = useLideradosStore();
+  const { liderados, updateStatus, agendarContato } = useLideradosStore();
+  const [search, setSearch] = useState("");
+  const [filterBairro, setFilterBairro] = useState("");
+  const [agendamentoLiderado, setAgendamentoLiderado] = useState<any>(null);
+  const [dataAgendamento, setDataAgendamento] = useState("");
   
   // Filtra indecisos e rejeição, ordenando por probabilidade (maior primeiro)
   const listaReconquista = liderados
-    .filter(l => l.status === 'indeciso' || l.status === 'rejeicao')
+    .filter(l => (l.status === 'indeciso' || l.status === 'rejeicao'))
+    .filter(l => l.nome.toLowerCase().includes(search.toLowerCase()) || l.bairro.toLowerCase().includes(search.toLowerCase()))
+    .filter(l => !filterBairro || l.bairro === filterBairro)
     .sort((a, b) => (b.probabilidadeReconquista || 0) - (a.probabilidadeReconquista || 0));
+
+  const bairros = Array.from(new Set(liderados.map(l => l.bairro)));
+
+  const handleAgendar = () => {
+    if (!agendamentoLiderado || !dataAgendamento) return;
+    agendarContato(agendamentoLiderado.id, dataAgendamento);
+    setAgendamentoLiderado(null);
+    setDataAgendamento("");
+  };
 
   const handleAction = (id: string, action: string) => {
     toast.success(`Ação registrada: ${action}`);
-    // Aqui poderíamos adicionar ao histórico
   };
 
   const converterParaApoiador = (id: string) => {
