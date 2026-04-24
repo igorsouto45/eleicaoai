@@ -562,6 +562,79 @@ const Eleitores = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* CRM Profile Dialog */}
+      <Dialog open={isCrmOpen} onOpenChange={setIsCrmOpen}>
+        <DialogContent className="glass-card border-border sm:max-w-[600px] max-h-[90vh] overflow-y-auto shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              Perfil do Liderado: {selectedLiderado?.nome}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold">Informação Básica</p>
+                <p className="text-sm"><strong>CPF:</strong> {selectedLiderado?.cpf}</p>
+                <p className="text-sm"><strong>Nascimento:</strong> {selectedLiderado?.dataNascimento}</p>
+                <p className="text-sm"><strong>Mãe:</strong> {selectedLiderado?.nomeMae}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold">Localização</p>
+                <p className="text-sm"><strong>Bairro:</strong> {selectedLiderado?.bairro}</p>
+                <p className="text-sm"><strong>Município:</strong> {selectedLiderado?.municipio} / {selectedLiderado?.uf}</p>
+                <p className="text-sm text-muted-foreground truncate" title={selectedLiderado?.endereco}>{selectedLiderado?.endereco}</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <p className="text-[10px] text-primary uppercase font-bold mb-2">Situação Eleitoral</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.tituloEleitoral || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Título</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.zona || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Zona</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold">{selectedLiderado?.secao || "---"}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase">Seção</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-[10px] text-muted-foreground uppercase font-bold">Histórico e Interações</p>
+              <div className="space-y-2">
+                <div className="p-3 bg-muted/30 rounded-lg border border-border flex items-start gap-3">
+                  <div className="h-2 w-2 rounded-full bg-success mt-1.5" />
+                  <div>
+                    <p className="text-xs font-medium">Cadastro realizado via {selectedLiderado?.origemNome}</p>
+                    <p className="text-[10px] text-muted-foreground">Em {selectedLiderado?.data}</p>
+                  </div>
+                </div>
+                {selectedLiderado?.historicoReconquista?.map((h: string, i: number) => (
+                  <div key={i} className="p-3 bg-muted/30 rounded-lg border border-border flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-primary mt-1.5" />
+                    <p className="text-xs">{h}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => gerarFichaPDF(selectedLiderado)}>
+              <Printer className="h-4 w-4 mr-2" /> Imprimir Ficha
+            </Button>
+            <Button className="gradient-primary" onClick={() => setIsCrmOpen(false)}>Fechar Perfil</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
