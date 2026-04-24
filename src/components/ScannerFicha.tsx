@@ -169,8 +169,10 @@ MUNICÍPIO: ____________________  UF: ____
 ENDEREÇO: ______________________________________________________
 BAIRRO: _______________________  WHATSAPP: _____________________
     `;
-    console.log(content);
-    window.open("https://placehold.co/600x800/262626/white?text=MODELO+OFICIAL+FICHA+COMPLETA", "_blank");
+    console.log("Template Gerado:", content);
+    
+    // Fallback para visualização do conteúdo caso a URL seja apenas placeholder
+    window.open("https://placehold.co/600x800/262626/white?text=FICHA+ATUALIZADA+COM\nCPF+TITULO+BIOMETRIA+MAE", "_blank");
   };
 
   return (
