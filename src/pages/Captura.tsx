@@ -1,23 +1,34 @@
 import { useState } from "react";
-import { Copy, QrCode, Link as LinkIcon, UserPlus } from "lucide-react";
+import { Copy, QrCode, Link as LinkIcon, UserPlus, Download, Printer } from "lucide-react";
 import QRCode from "react-qr-code";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const mockLinks = [
-  { id: 1, usuario: "João Silva (Líder)", codigo: "joao-silva", cadastros: 142, conversoes: 98 },
-  { id: 2, usuario: "Ana Costa (Líder)", codigo: "ana-costa", cadastros: 89, conversoes: 61 },
-  { id: 3, usuario: "Pedro Lima (Operador)", codigo: "pedro-lima", cadastros: 56, conversoes: 34 },
+  { id: "1", usuario: "Administrador", codigo: "admin", cadastros: 0, conversoes: 0 },
+  { id: "2", usuario: "João Líder", codigo: "joao-lider", cadastros: 142, conversoes: 98 },
+  { id: "3", usuario: "Ana Líder", codigo: "ana-lider", cadastros: 89, conversoes: 61 },
 ];
 
 const Captura = () => {
-  const [selectedLink, setSelectedLink] = useState(mockLinks[0].codigo);
+  const { user } = useAuthStore();
+  const isAdmin = user?.tipo === "admin";
+  
+  // Se for líder, ele só vê o seu próprio link
+  const initialLink = isAdmin ? mockLinks[1].codigo : (user?.id === "2" ? "joao-lider" : "ana-lider");
+  const [selectedLink, setSelectedLink] = useState(initialLink);
   const baseUrl = window.location.origin;
 
   const copyLink = (codigo: string) => {
     navigator.clipboard.writeText(`${baseUrl}/cadastro/${codigo}`);
     toast.success("Link copiado!");
+  };
+
+  const downloadQR = () => {
+    toast.success("Baixando QR Code oficial...");
+    // Simulação de download
   };
 
   return (
