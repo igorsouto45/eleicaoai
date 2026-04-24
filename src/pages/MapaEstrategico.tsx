@@ -115,15 +115,28 @@ const MapaEstrategico = () => {
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             <HeatmapLayer points={heatPoints} />
-            {bairros.map((b) => (
-              <Marker key={b.nome} position={[b.lat, b.lng]}>
+            {statsPorLider.map((s) => (
+              <Marker key={s.id} position={[s.coords.lat, s.coords.lng]}>
                 <Popup>
-                  <div className="text-sm">
-                    <strong>{b.nome}</strong>
-                    <div>Total: {b.total}</div>
-                    <div style={{ color: "#22c55e" }}>Apoiadores: {b.apoiadores}</div>
-                    <div style={{ color: "#eab308" }}>Indecisos: {b.indecisos}</div>
-                    <div style={{ color: "#ef4444" }}>Rejeição: {b.rejeicao}</div>
+                  <div className="text-sm p-1">
+                    <strong className="text-primary block mb-1">{s.nome}</strong>
+                    <div className="font-bold border-b border-border pb-1 mb-1">
+                      {s.total} Liderados ({s.percentualGeral.toFixed(1)}%)
+                    </div>
+                    <div className="flex flex-col gap-0.5 mt-2">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-green-500">Apoiadores:</span>
+                        <span className="font-bold">{s.apoiadores}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-yellow-500">Indecisos:</span>
+                        <span className="font-bold">{s.indecisos}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-red-500">Rejeição:</span>
+                        <span className="font-bold">{s.rejeicao}</span>
+                      </div>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -131,30 +144,52 @@ const MapaEstrategico = () => {
           </MapContainer>
         </motion.div>
 
-        {/* Bairro cards */}
+        {/* Leader cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {bairros.map((b, i) => (
+          {statsPorLider.map((s, i) => (
             <motion.div
-              key={b.nome}
+              key={s.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.03 }}
-              className="glass-card rounded-xl p-4"
+              transition={{ delay: i * 0.05 }}
+              className="glass-card rounded-xl p-4 border border-white/5 hover:border-primary/30 transition-all"
             >
-              <div className="mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">{b.nome}</h3>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground truncate max-w-[120px]">{s.nome}</h3>
+                </div>
+                <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20">
+                  {s.percentualGeral.toFixed(1)}%
+                </Badge>
               </div>
-              <p className={`text-xl font-bold ${getStatusColor(b)} mb-2`}>{b.total}</p>
-              <div className="flex h-2.5 overflow-hidden rounded-full">
-                <div className="bg-green-500" style={{ width: `${(b.apoiadores / b.total) * 100}%` }} />
-                <div className="bg-yellow-500" style={{ width: `${(b.indecisos / b.total) * 100}%` }} />
-                <div className="bg-red-500" style={{ width: `${(b.rejeicao / b.total) * 100}%` }} />
+              
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className={`text-2xl font-bold ${getStatusColor(s)}`}>{s.total}</span>
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Liderados</span>
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                <span>{b.apoiadores}</span>
-                <span>{b.indecisos}</span>
-                <span>{b.rejeicao}</span>
+
+              <div className="space-y-2">
+                <div className="flex h-1.5 overflow-hidden rounded-full bg-white/5">
+                  <div className="bg-green-500" style={{ width: `${(s.apoiadores / s.total) * 100}%` }} />
+                  <div className="bg-yellow-500" style={{ width: `${(s.indecisos / s.total) * 100}%` }} />
+                  <div className="bg-red-500" style={{ width: `${(s.rejeicao / s.total) * 100}%` }} />
+                </div>
+                
+                <div className="flex justify-between items-center text-[9px] font-bold">
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    <span className="text-muted-foreground">{s.apoiadores}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                    <span className="text-muted-foreground">{s.indecisos}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                    <span className="text-muted-foreground">{s.rejeicao}</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
