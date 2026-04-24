@@ -65,13 +65,13 @@ const Alertas = () => {
         </div>
 
         <div className="space-y-3">
-          {notificacoes.length === 0 ? (
+          {filteredNotificacoes.length === 0 ? (
             <div className="glass-card rounded-xl p-10 text-center">
               <Bell className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-20" />
               <p className="text-sm text-muted-foreground">Nenhuma atividade recente registrada.</p>
             </div>
           ) : (
-            notificacoes.map((n) => (
+            filteredNotificacoes.map((n) => (
               <div key={n.id} className="glass-card p-4 rounded-xl flex items-start gap-4 hover:bg-muted/30 transition-colors border-l-4 border-l-primary/30">
                 <div className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center shrink-0">
                   {getIcon(n.tipo)}
