@@ -14,26 +14,41 @@ export interface Liderado {
   sincronizado: boolean;
   probabilidadeReconquista?: number;
   historicoReconquista?: string[];
+  proximoContato?: string;
 }
 
 export interface Notificacao {
   id: string;
-  tipo: 'cadastro' | 'status' | 'transferencia';
+  tipo: 'cadastro' | 'status' | 'transferencia' | 'combustivel';
   mensagem: string;
   data: string;
   liderNome: string;
   lideradoNome: string;
 }
 
+export interface RegistroCombustivel {
+  id: string;
+  liderId: string;
+  liderNome: string;
+  valor: number;
+  kmAtual: number;
+  kmAnterior: number;
+  kmRodados: number;
+  data: string;
+}
+
 interface LideradosState {
   liderados: Liderado[];
   notificacoes: Notificacao[];
+  registrosCombustivel: RegistroCombustivel[];
   addLiderado: (liderado: Omit<Liderado, 'id' | 'sincronizado'>) => void;
   syncLiderados: () => void;
   transferLiderado: (id: string, novoLiderId: string, novoLiderNome: string) => void;
   updateStatus: (id: string, novoStatus: Liderado['status']) => void;
+  agendarContato: (id: string, data: string) => void;
   addNotificacao: (notificacao: Omit<Notificacao, 'id' | 'data'>) => void;
   limparNotificacoes: () => void;
+  registrarCombustivel: (liderId: string, liderNome: string, valor: number, kmAtual: number) => void;
 }
 
 export const useLideradosStore = create<LideradosState>()(
