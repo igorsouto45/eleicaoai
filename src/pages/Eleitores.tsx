@@ -151,6 +151,14 @@ const Eleitores = () => {
           </div>
           
           <div className="flex gap-2">
+            {!isAdmin && (
+              <Button variant="outline" className="border-border hover:bg-muted" onClick={() => {
+                toast.success("Gerando PDF com sua lista de liderados e QR Codes...");
+                // Simulação de geração de PDF
+              }}>
+                <Download className="mr-2 h-4 w-4" /> Baixar Minha Lista (PDF)
+              </Button>
+            )}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground shadow-primary">
