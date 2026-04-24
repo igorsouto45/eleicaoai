@@ -120,8 +120,16 @@ const Liderancas = () => {
           </Dialog>
         </div>
 
-      {/* Top 3 cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {ranking.length === 0 ? (
+        <div className="glass-card rounded-xl p-12 text-center border border-dashed border-border/50">
+          <Trophy className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground">Aguardando Cadastros</h3>
+          <p className="text-sm text-muted-foreground">O ranking de lideranças será exibido assim que os primeiros liderados forem cadastrados.</p>
+        </div>
+      ) : (
+        <>
+        {/* Top 3 cards */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {ranking.slice(0, 3).map((r, i) => (
           <motion.div
             key={r.pos}
@@ -188,7 +196,9 @@ const Liderancas = () => {
             ))}
           </tbody>
         </table>
-      </div>
+        </div>
+        </>
+      )}
 
       {/* Fuel History */}
       <div className="glass-card rounded-xl p-5">
