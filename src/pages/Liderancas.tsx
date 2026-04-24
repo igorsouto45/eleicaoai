@@ -139,6 +139,7 @@ const Liderancas = () => {
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Liderados</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Conversões</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Taxa</th>
+              <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</th>
             </tr>
           </thead>
           <tbody>
