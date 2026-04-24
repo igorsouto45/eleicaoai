@@ -59,7 +59,19 @@ export const useLideradosStore = create<LideradosState>()(
         { id: '2', nome: "Carlos Santos", telefone: "(11) 99888-5678", bairro: "Jardim América", status: "indeciso", origemId: "3", origemNome: "Ana Líder", data: "2024-03-14", sincronizado: true, probabilidadeReconquista: 65, historicoReconquista: ["Tentativa 1: WhatsApp enviado em 20/04"] },
       ],
       notificacoes: [],
+      registrosCombustivel: [],
       addLiderado: (data) => {
+        const { liderados } = get();
+        
+        // Deduplicação por telefone (limpa caracteres não numéricos)
+        const phoneDigits = data.telefone.replace(/\D/g, "");
+        const duplicate = liderados.find(l => l.telefone.replace(/\D/g, "") === phoneDigits);
+        
+        if (duplicate) {
+          toast.error(`Eleitor já cadastrado: ${duplicate.nome} (${duplicate.origemNome})`);
+          return;
+        }
+
         const newId = Math.random().toString(36).substr(2, 9);
         const newLiderado: Liderado = {
           ...data,
@@ -131,10 +143,54 @@ export const useLideradosStore = create<LideradosState>()(
           ]
         }));
       },
+      agendarContato: (id, proximaData) => {
+        set((state) => ({
+          liderados: state.liderados.map(l => 
+            l.id === id ? { ...l, proximoContato: proximaData } : l
+          )
+        }));
+        toast.success("Abordagem agendada com sucesso!");
+      },
       addNotificacao: (n) => set((state) => ({
         notificacoes: [{ ...n, id: Math.random().toString(36).substr(2, 9), data: new Date().toISOString() }, ...state.notificacoes]
       })),
       limparNotificacoes: () => set({ notificacoes: [] }),
+      registrarCombustivel: (liderId, liderNome, valor, kmAtual) => {
+        const { registrosCombustivel } = get();
+        const ultimoRegistro = [...registrosCombustivel]
+          .filter(r => r.liderId === liderId)
+          .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0];
+        
+        const kmAnterior = ultimoRegistro ? ultimoRegistro.kmAtual : kmAtual;
+        const kmRodados = kmAtual - kmAnterior;
+
+        const novoRegistro: RegistroCombustivel = {
+          id: Math.random().toString(36).substr(2, 9),
+          liderId,
+          liderNome,
+          valor,
+          kmAtual,
+          kmAnterior,
+          kmRodados: kmRodados > 0 ? kmRodados : 0,
+          data: new Date().toISOString(),
+        };
+
+        set((state) => ({
+          registrosCombustivel: [novoRegistro, ...state.registrosCombustivel],
+          notificacoes: [
+            {
+              id: Math.random().toString(36).substr(2, 9),
+              tipo: 'combustivel',
+              mensagem: `Ajuda de custo registrada para ${liderNome}: R$ ${valor}`,
+              data: new Date().toISOString(),
+              liderNome,
+              lideradoNome: "N/A"
+            },
+            ...state.notificacoes
+          ]
+        }));
+        toast.success("Ajuda de combustível registrada!");
+      }
     }),
     {
       name: 'liderados-storage',
