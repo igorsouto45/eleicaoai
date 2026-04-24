@@ -156,24 +156,8 @@ const ScannerFicha = () => {
   };
 
   const downloadTemplate = () => {
-    // Simular download do modelo oficial
-    toast.info("Baixando modelo oficial de ficha...");
-    const content = `
-MODELO OFICIAL COMANDO ELEITORAL
-
-NOME COMPLETO: _________________________________________________
-CPF: __________________________  NASCIMENTO: ___/___/_______
-NOME DA MÃE: __________________________________________________
-TÍTULO: _______________________  SEÇÃO: ________  ZONA: ________
-BIOMETRIA: ( ) SIM  ( ) NÃO
-MUNICÍPIO: ____________________  UF: ____
-ENDEREÇO: ______________________________________________________
-BAIRRO: _______________________  WHATSAPP: _____________________
-    `;
-    console.log("Template Gerado:", content);
-    
-    // Fallback para visualização do conteúdo caso a URL seja apenas placeholder
-    window.open("https://placehold.co/600x800/262626/white?text=FICHA+ATUALIZADA+COM\nCPF+TITULO+BIOMETRIA+MAE", "_blank");
+    toast.info("Gerando modelo oficial de ficha...");
+    gerarFichaPDF();
   };
 
   return (
