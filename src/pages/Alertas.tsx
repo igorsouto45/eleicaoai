@@ -1,50 +1,71 @@
-import { Bell, UserPlus, ArrowUpDown, MapPin, TrendingDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { Bell, UserPlus, ArrowLeftRight, Activity, Trash2, Clock } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
+import { useLideradosStore } from "@/store/useLideradosStore";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const alertas = [
-  { id: 1, icon: UserPlus, tipo: "Novo cadastro", msg: "Maria Silva foi cadastrada por João (Líder)", tempo: "Há 5 min", cor: "text-[hsl(var(--success))]" },
-  { id: 2, icon: ArrowUpDown, tipo: "Mudança de status", msg: "Carlos Santos mudou de Indeciso para Apoiador", tempo: "Há 15 min", cor: "text-primary" },
-  { id: 3, icon: MapPin, tipo: "Crescimento regional", msg: "Bairro Centro atingiu 340 eleitores cadastrados", tempo: "Há 1h", cor: "text-[hsl(var(--warning))]" },
-  { id: 4, icon: TrendingDown, tipo: "Queda de engajamento", msg: "Bairro Jardim América teve queda de 12% em cadastros", tempo: "Há 2h", cor: "text-[hsl(var(--destructive))]" },
-  { id: 5, icon: UserPlus, tipo: "Novo cadastro", msg: "Paulo Mendes foi cadastrado por Ana (Líder)", tempo: "Há 3h", cor: "text-[hsl(var(--success))]" },
-];
+const Alertas = () => {
+  const { notificacoes, limparNotificacoes } = useLideradosStore();
 
-const Alertas = () => (
-  <AppLayout>
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Alertas</h1>
-          <p className="text-sm text-muted-foreground">Notificações em tempo real da campanha</p>
+  const getIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'cadastro': return <UserPlus className="h-4 w-4 text-success" />;
+      case 'transferencia': return <ArrowLeftRight className="h-4 w-4 text-primary" />;
+      case 'status': return <Activity className="h-4 w-4 text-warning" />;
+      default: return <Bell className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Histórico de Atividades</h1>
+            <p className="text-sm text-muted-foreground">Monitore cadastros e mudanças em tempo real</p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={limparNotificacoes} className="text-xs text-muted-foreground hover:text-destructive">
+            <Trash2 className="h-3.5 w-3.5 mr-2" /> Limpar Tudo
+          </Button>
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary shadow-primary animate-pulse-glow">
-          <Bell className="h-4 w-4 text-primary-foreground" />
+
+        <div className="space-y-3">
+          {notificacoes.length === 0 ? (
+            <div className="glass-card rounded-xl p-10 text-center">
+              <Bell className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-20" />
+              <p className="text-sm text-muted-foreground">Nenhuma atividade recente registrada.</p>
+            </div>
+          ) : (
+            notificacoes.map((n) => (
+              <div key={n.id} className="glass-card p-4 rounded-xl flex items-start gap-4 hover:bg-muted/30 transition-colors border-l-4 border-l-primary/30">
+                <div className="h-9 w-9 rounded-lg bg-card border border-border flex items-center justify-center shrink-0">
+                  {getIcon(n.tipo)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-semibold text-foreground">{n.mensagem}</p>
+                    <span className="text-[10px] text-muted-foreground flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {format(new Date(n.data), "HH:mm 'de' d 'de' MMM", { locale: ptBR })}
+                    </span>
+                  </div>
+                  <div className="flex gap-4">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-bold text-primary/70">Líder:</span> {n.liderNome}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-bold text-primary/70">Liderado:</span> {n.lideradoNome}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
-
-      <div className="space-y-3">
-        {alertas.map((a, i) => (
-          <motion.div
-            key={a.id}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="glass-card flex items-start gap-4 rounded-xl p-4"
-          >
-            <div className={`mt-0.5 ${a.cor}`}>
-              <a.icon className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{a.tipo}</p>
-              <p className="mt-1 text-sm text-foreground">{a.msg}</p>
-            </div>
-            <span className="shrink-0 text-xs text-muted-foreground">{a.tempo}</span>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </AppLayout>
-);
+    </AppLayout>
+  );
+};
 
 export default Alertas;
