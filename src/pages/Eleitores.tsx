@@ -297,7 +297,9 @@ const Eleitores = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="glass-card border-border">
                         <DropdownMenuLabel className="text-xs">Ações</DropdownMenuLabel>
-                        <DropdownMenuItem className="text-xs cursor-pointer"><Eye className="mr-2 h-3 w-3" /> Ver Perfil</DropdownMenuItem>
+                        <DropdownMenuItem className="text-xs cursor-pointer" disabled={!canEdit(e)}>
+                          <Eye className="mr-2 h-3 w-3" /> Ver Perfil
+                        </DropdownMenuItem>
                         {isAdmin && (
                           <>
                             <DropdownMenuSeparator className="bg-border" />
