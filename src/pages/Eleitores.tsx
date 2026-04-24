@@ -162,7 +162,7 @@ const Eleitores = () => {
       e.nome.toLowerCase().includes(searchLower) || 
       e.bairro.toLowerCase().includes(searchLower) ||
       (e.cpf && e.cpf.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""))) ||
-      e.telefone.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""));
+      (e.telefone && e.telefone.replace(/\D/g, "").includes(searchLower.replace(/\D/g, "")));
 
     const matchFilter = !filterStatus || e.status === filterStatus;
     const matchBiometria = filterBiometria === "todos" ? true : (filterBiometria === "sim" ? e.temBiometria : !e.temBiometria);

@@ -21,8 +21,9 @@ L.Icon.Default.mergeOptions({
 // Coordenadas centrais aproximadas para representação no mapa (Rio de Janeiro)
 const LIDER_COORDS: Record<string, { lat: number; lng: number }> = {
   "1": { lat: -22.9068, lng: -43.1729 }, // Igor Souto (Admin)
-  "unknown": { lat: -22.9325, lng: -43.2436 }, // Sistema/Outros
 };
+
+const DEFAULT_COORD = { lat: -22.9325, lng: -43.2436 };
 
 const MapaEstrategico = () => {
   const { liderados } = useLideradosStore();
@@ -38,7 +39,7 @@ const MapaEstrategico = () => {
         indecisos: 0, 
         rejeicao: 0, 
         total: 0,
-        coords: LIDER_COORDS[l.origemId] || LIDER_COORDS["unknown"]
+        coords: LIDER_COORDS[l.origemId] || DEFAULT_COORD
       };
       
       entry.total++;

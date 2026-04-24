@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 
-export const gerarFichaPDF = (dados?: any) => {
+export const gerarFichaPDF = (dados?: any, download: boolean = true) => {
   const doc = new jsPDF();
   const margin = 20;
   let yPos = 30;

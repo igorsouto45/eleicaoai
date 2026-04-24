@@ -47,10 +47,16 @@ const CadastroPublico = () => {
     
     // Validação básica dos campos obrigatórios
     if (!form.nome || !form.cpf || !form.telefone || !form.bairro || !form.intencao || !form.nomeMae || !form.endereco) {
-      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      toast.error("Por favor, preencha todos os campos obrigatórios marcados com *.");
       return;
     }
-    
+
+    // Validação de CPF (básica: apenas se está completo)
+    if (form.cpf.replace(/\D/g, "").length !== 11) {
+      toast.error("Por favor, insira um CPF válido.");
+      return;
+    }
+
     setLoading(true);
     
     // Mapear intenção para o status do CRM
