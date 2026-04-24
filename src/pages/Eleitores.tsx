@@ -108,7 +108,7 @@ const Eleitores = () => {
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary text-primary-foreground shadow-primary">
-                  <Plus className="mr-2 h-4 w-4" /> Novo Eleitor
+                  <Plus className="mr-2 h-4 w-4" /> Novo Liderado
                 </Button>
               </DialogTrigger>
               <DialogContent className="glass-card border-border sm:max-w-[500px]">
