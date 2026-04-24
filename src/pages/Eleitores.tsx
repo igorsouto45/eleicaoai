@@ -132,6 +132,10 @@ const Eleitores = () => {
     return matchSearch && matchFilter && matchOwner;
   });
 
+  const canEdit = useCallback((liderado: any) => {
+    return isAdmin || liderado.origemId === user?.id;
+  }, [isAdmin, user?.id]);
+
   return (
     <AppLayout>
       <div className="space-y-6">
