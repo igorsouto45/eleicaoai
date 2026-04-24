@@ -34,14 +34,34 @@ const Alertas = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Histórico de Atividades</h1>
             <p className="text-sm text-muted-foreground">Monitore cadastros e mudanças em tempo real</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={limparNotificacoes} className="text-xs text-muted-foreground hover:text-destructive">
-            <Trash2 className="h-3.5 w-3.5 mr-2" /> Limpar Tudo
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Filter className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={filterTipo} 
+                onChange={e => setFilterTipo(e.target.value)}
+                className="pl-8 pr-4 h-9 text-xs bg-card border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary appearance-none"
+              >
+                <option value="todos">Todos Eventos</option>
+                <option value="cadastro">Cadastros</option>
+                <option value="status">Status</option>
+                <option value="transferencia">Transferências</option>
+                <option value="combustivel">Combustível</option>
+              </select>
+            </div>
+            <Button variant="outline" size="sm" onClick={exportLog} className="text-xs h-9">
+              <Download className="h-3.5 w-3.5 mr-2" /> Exportar Log
+            </Button>
+            <Button variant="ghost" size="sm" onClick={limparNotificacoes} className="text-xs h-9 text-muted-foreground hover:text-destructive">
+              <Trash2 className="h-3.5 w-3.5 mr-2" /> Limpar
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-3">
