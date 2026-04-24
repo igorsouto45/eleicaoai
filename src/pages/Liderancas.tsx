@@ -12,18 +12,44 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLideradosStore } from "@/store/useLideradosStore";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-const ranking = [];
+// ranking was moved inside the component to be dynamic based on liderados store
 
 const medalColors = ["text-[hsl(45,93%,47%)]", "text-muted-foreground", "text-[hsl(25,80%,50%)]"];
 
 const Liderancas = () => {
-  const { registrosCombustivel, registrarCombustivel } = useLideradosStore();
+  const { liderados, registrosCombustivel, registrarCombustivel } = useLideradosStore();
+  
+  const ranking = useMemo(() => {
+    const lideresMap: Record<string, any> = {};
+    
+    liderados.forEach(l => {
+      if (!lideresMap[l.origemId]) {
+        lideresMap[l.origemId] = {
+          id: l.origemId,
+          nome: l.origemNome,
+          tipo: l.origemId === "1" ? "Coordenador" : "Líder",
+          cadastros: 0,
+          conversoes: 0
+        };
+      }
+      lideresMap[l.origemId].cadastros++;
+      if (l.status === 'apoiador') lideresMap[l.origemId].conversoes++;
+    });
+
+    return Object.values(lideresMap)
+      .map(l => ({
+        ...l,
+        taxa: l.cadastros > 0 ? Math.round((l.conversoes / l.cadastros) * 100) : 0
+      }))
+      .sort((a, b) => b.cadastros - a.cadastros)
+      .map((l, index) => ({ ...l, pos: index + 1 }));
+  }, [liderados]);
   const [selectedLider, setSelectedLider] = useState<any>(null);
   const [fuelValue, setFuelValue] = useState("");
   const [kmValue, setKmValue] = useState("");
@@ -94,8 +120,16 @@ const Liderancas = () => {
           </Dialog>
         </div>
 
-      {/* Top 3 cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {ranking.length === 0 ? (
+        <div className="glass-card rounded-xl p-12 text-center border border-dashed border-border/50">
+          <Trophy className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground">Aguardando Cadastros</h3>
+          <p className="text-sm text-muted-foreground">O ranking de lideranças será exibido assim que os primeiros liderados forem cadastrados.</p>
+        </div>
+      ) : (
+        <>
+        {/* Top 3 cards */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {ranking.slice(0, 3).map((r, i) => (
           <motion.div
             key={r.pos}
@@ -162,7 +196,9 @@ const Liderancas = () => {
             ))}
           </tbody>
         </table>
-      </div>
+        </div>
+        </>
+      )}
 
       {/* Fuel History */}
       <div className="glass-card rounded-xl p-5">

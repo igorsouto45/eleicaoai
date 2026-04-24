@@ -114,7 +114,7 @@ const MapaEstrategico = () => {
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
-            <HeatmapLayer points={heatPoints} />
+            {heatPoints.length > 0 && <HeatmapLayer points={heatPoints} />}
             {statsPorLider.map((s) => (
               <Marker key={s.id} position={[s.coords.lat, s.coords.lng]}>
                 <Popup>
@@ -145,7 +145,14 @@ const MapaEstrategico = () => {
         </motion.div>
 
         {/* Leader cards */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {statsPorLider.length === 0 ? (
+          <div className="glass-card rounded-xl p-12 text-center border border-dashed border-border/50">
+            <Users className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground">Aguardando Dados Geográficos</h3>
+            <p className="text-sm text-muted-foreground">O mapa será preenchido conforme os líderes realizarem novos cadastros.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statsPorLider.map((s, i) => (
             <motion.div
               key={s.id}
@@ -193,7 +200,8 @@ const MapaEstrategico = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
